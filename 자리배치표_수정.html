@@ -292,6 +292,18 @@ body::before{
 }
 .seat.anim{animation:pop .32s cubic-bezier(.34,1.56,.64,1)}
 
+/* ── DRAG & DROP ── */
+.seat[draggable="true"]{cursor:grab}
+.seat[draggable="true"]:active{cursor:grabbing}
+.seat.dragging{opacity:.3;transform:scale(.95);pointer-events:none}
+.seat.drag-over{
+  outline:2.5px dashed var(--wood)!important;
+  outline-offset:3px;
+  background:linear-gradient(160deg,#FFFDE7,#FFF9C4)!important;
+  border-color:var(--yb)!important;
+  transform:scale(1.04);
+}
+
 /* ── CLASS INFO BAR ── */
 .class-info-bar{
   margin-top:6px;padding:7px 14px;flex-shrink:0;
@@ -891,6 +903,7 @@ let pairMode=false;
 let printTheme=0;
 let activeTab='input';
 let parsedFileStudents=null;
+let dragSrcIdx=null;
 function getTotal(){return COLS*ROWS+bonus;}
 
 /* ── THEMES ── */
@@ -1140,6 +1153,38 @@ function makeSeatEl(i){
     :`<div class="sname" style="opacity:.3;font-size:13px">빈 자리</div>`;
   el.onclick=()=>clickSeat(i);
   el.oncontextmenu=e=>{e.preventDefault();toggleFixed(i);};
+
+  // ── drag & drop ──
+  el.draggable=true;
+  el.addEventListener('dragstart',e=>{
+    dragSrcIdx=i;
+    el.classList.add('dragging');
+    e.dataTransfer.effectAllowed='move';
+    e.dataTransfer.setData('text/plain',String(i));
+  });
+  el.addEventListener('dragend',()=>{
+    dragSrcIdx=null;
+    document.querySelectorAll('.seat.dragging').forEach(s=>s.classList.remove('dragging'));
+    document.querySelectorAll('.seat.drag-over').forEach(s=>s.classList.remove('drag-over'));
+  });
+  el.addEventListener('dragover',e=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    if(dragSrcIdx!==null&&dragSrcIdx!==i)el.classList.add('drag-over');
+  });
+  el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
+  el.addEventListener('drop',e=>{
+    e.preventDefault();
+    el.classList.remove('drag-over');
+    if(dragSrcIdx===null||dragSrcIdx===i)return;
+    const src=dragSrcIdx;
+    [seats[src],seats[i]]=[seats[i],seats[src]];
+    dragSrcIdx=null;
+    updateSeatEl(src);updateSeatEl(i);
+    autoSave();
+    toast('↔️ 자리를 교체했어요');
+  });
+
   return el;
 }
 
