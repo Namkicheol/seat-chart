@@ -707,12 +707,14 @@ body::before{
   .nlt{background:transparent!important;}
   .nlt tbody tr{background:transparent!important;}
   .nlt tbody tr:nth-child(even){background:transparent!important;}
-  /* 명단 아래 빈공간 — 캐릭터 일러스트 */
+  /* 명단 아래 빈공간 — 귀여운 학교 일러스트 */
   .nlt-scroll::after{
-    content:'🏫📚✏️';
+    content:'🏫';
     display:block;text-align:center;
-    font-size:22px;opacity:.35;
-    padding:14px 0 0;letter-spacing:6px;
+    font-size:54px;opacity:.55;
+    padding:22px 0 0;
+    transform:rotate(-4deg);
+    filter:drop-shadow(0 2px 3px rgba(44,24,16,.12));
   }
   .nlt-head{padding:5px 9px!important}
   .nlt-head-txt{font-size:13px!important}
