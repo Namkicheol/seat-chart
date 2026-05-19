@@ -544,6 +544,11 @@ body::before{
 .etbl th{background:var(--chalk);padding:6px 8px;text-align:center;font-size:11px;color:var(--wood);font-weight:700;border-bottom:1.5px solid var(--chalk2)}
 .etbl td{padding:3px 5px;border-bottom:1px solid var(--chalk2)}
 .etbl td.rlbl{text-align:center;font-size:11px;color:var(--ink2);font-weight:700;padding-right:3px;white-space:nowrap}
+/* 학번 컬럼 토글 (헤더 클릭) */
+.etbl.hide-id td:nth-child(2){padding:0;width:0}
+.etbl.hide-id td:nth-child(2) input{display:none}
+.etbl.hide-id th:nth-child(2){width:42px;font-size:10px;color:var(--ink2);opacity:.6}
+#idTh:hover{background:var(--cream)}
 .etbl td.rdel{text-align:center;padding:3px 4px}
 .btn-del-row{width:24px;height:24px;border:1.5px solid rgba(229,57,53,.3);background:rgba(255,235,238,.6);color:#C62828;border-radius:6px;font-size:13px;font-weight:900;cursor:pointer;line-height:1;padding:0;transition:all .15s}
 .btn-del-row:hover{background:#E53935;color:white;border-color:#C62828;transform:scale(1.08)}
@@ -695,8 +700,18 @@ body::before{
 
   /* right name list print */
   .nlp{width:52mm!important;flex-shrink:0!important;display:flex!important;flex-direction:column!important;}
-  .nlt-card{border-radius:6px!important;border-width:1.5px!important;flex:1!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:transparent!important;}
-  .nlt-scroll{flex:1!important;overflow:hidden!important;}
+  .nlt-card{border-radius:6px!important;border-width:1.5px!important;flex:1!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:transparent!important;box-shadow:none!important;}
+  .nlt-scroll{flex:1!important;overflow:hidden!important;background:transparent!important;position:relative!important;}
+  .nlt{background:transparent!important;}
+  .nlt tbody tr{background:transparent!important;}
+  .nlt tbody tr:nth-child(even){background:transparent!important;}
+  /* 명단 아래 빈공간 — 캐릭터 일러스트 */
+  .nlt-scroll::after{
+    content:'🏫📚✏️';
+    display:block;text-align:center;
+    font-size:22px;opacity:.35;
+    padding:14px 0 0;letter-spacing:6px;
+  }
   .nlt-head{padding:5px 9px!important}
   .nlt-head-txt{font-size:13px!important}
   .nlt th{padding:var(--print-list-pad-v,3px) var(--print-list-pad-h,7px)!important;font-size:var(--print-list-head-font,11px)!important}
@@ -1025,7 +1040,7 @@ body::before{
       <div class="msub">이름만 입력해도 됩니다. <strong>학번은 비워두면 행 번호(01, 02 …)가 자동 부여됩니다.</strong></div>
       <div class="etbl-wrap">
         <table class="etbl">
-          <thead><tr><th style="width:32px">번</th><th style="width:90px">학번</th><th>이름</th><th style="width:30px"></th></tr></thead>
+          <thead><tr><th style="width:32px">번</th><th style="width:90px;cursor:pointer;user-select:none" id="idTh" onclick="toggleIdColumn()" title="클릭하면 학번 입력 칸을 숨기거나 다시 보일 수 있어요">학번 ▼</th><th>이름</th><th style="width:30px"></th></tr></thead>
           <tbody id="editBody"></tbody>
         </table>
       </div>
@@ -1731,6 +1746,14 @@ function openStudentModal(){
   // tab-input 채우기
   buildEditTable();
   switchTab('input');
+  // 학번 컬럼 sticky 상태 복원
+  try{
+    const hide=localStorage.getItem('hide-id-col')==='1';
+    const tbl=document.querySelector('.etbl');
+    tbl.classList.toggle('hide-id',hide);
+    const th=document.getElementById('idTh');
+    if(th)th.textContent=hide?'학번 ▶':'학번 ▼';
+  }catch(_){}
   openModal('studentModal');
 }
 
@@ -1753,6 +1776,14 @@ function addEditRowAt(i,id,name){
     <td><input type="text" placeholder="이름" value="${name}" id="enm_${i}" maxlength="10"></td>
     <td class="rdel"><button type="button" class="btn-del-row" title="행 삭제" onclick="delEditRow(${i})">✕</button></td>`;
   tb.appendChild(tr);
+}
+
+function toggleIdColumn(){
+  const tbl=document.querySelector('.etbl');
+  const hidden=tbl.classList.toggle('hide-id');
+  const th=document.getElementById('idTh');
+  if(th)th.textContent=hidden?'학번 ▶':'학번 ▼';
+  try{localStorage.setItem('hide-id-col',hidden?'1':'0');}catch(_){}
 }
 
 function delEditRow(i){
