@@ -1943,11 +1943,19 @@ document.addEventListener('keydown',e=>{
   e.preventDefault();
   if(nr<0||nr>=dispRows||nc<0||nc>=COLS)return;
   const next=nr*COLS+nc;
-  if(next>=total)return;
+  // next가 partial row의 placeholder 위치라면 seats를 확장 (벽돌처럼 막히던 동작 해제)
+  let expanded=false;
+  if(next>=total){
+    const fullRows=Math.ceil(total/COLS);
+    if(nr!==fullRows-1)return;
+    while(seats.length<=next){seats.push(null);bonus++;}
+    expanded=true;
+  }
   if(fixed.has(sel)||fixed.has(next)){toast('📌 고정된 자리는 교체할 수 없어요');return;}
   [seats[sel],seats[next]]=[seats[next],seats[sel]];
   const prev=sel;sel=next;
-  updateSeatEl(prev);updateSeatEl(next);
+  if(expanded){render();}
+  else{updateSeatEl(prev);updateSeatEl(next);}
   autoSave();updatePinBtn();
 });
 </script>
