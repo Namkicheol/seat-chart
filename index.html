@@ -1055,19 +1055,18 @@ body::before{
     <!-- 붙여넣기 탭 -->
     <div class="tab-pane" id="tab-paste">
       <div class="paste-hint">
-        엑셀에서 이름(또는 학번+이름) 범위를 복사 후 아래에 붙여넣기<br>
-        형식: <code>이름</code> 또는 <code>학번[탭 or 쉼표]이름</code> (한 줄에 한 명)<br>
-        예시: <code>3101	홍길동</code> 또는 <code>홍길동</code>
+        엑셀에서 <b>이름</b>만 복사해서 붙여넣어도 됩니다. <strong>학번은 선택사항 — 없으면 01, 02 … 자동 부여.</strong><br>
+        형식: <code>이름</code> (한 줄 한 명) · 학번 같이 넣으려면 <code>학번[탭 or 쉼표]이름</code>
       </div>
-      <textarea class="paste-area" id="pasteArea" placeholder="여기에 붙여넣기 (Ctrl+V / Cmd+V)&#10;&#10;예)&#10;3101	홍길동&#10;3102	김철수&#10;3103	이영희"></textarea>
+      <textarea class="paste-area" id="pasteArea" placeholder="여기에 붙여넣기 (Ctrl+V / Cmd+V)&#10;&#10;이름만:&#10;홍길동&#10;김철수&#10;이영희&#10;&#10;또는 학번+이름:&#10;3101	홍길동&#10;3102	김철수"></textarea>
     </div>
 
     <!-- 파일 탭 -->
     <div class="tab-pane" id="tab-file">
       <div class="paste-hint">
-        CSV 또는 TXT 파일을 업로드하세요.<br>
+        CSV 또는 TXT 파일을 업로드하세요. <strong>학번은 선택 — 이름만 적힌 파일도 OK (01, 02 … 자동 부여).</strong><br>
         Excel → <code>다른 이름으로 저장</code> → <code>CSV(쉼표로 분리)</code> 선택 후 업로드<br>
-        형식: <code>학번,이름</code> 또는 <code>이름</code> (한 줄에 한 명)
+        형식: <code>이름</code> (한 줄 한 명) · 학번 같이 넣으려면 <code>학번,이름</code>
       </div>
       <div class="file-drop" id="fileDrop" onclick="document.getElementById('fileStudentInput').click()"
         ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)" ondrop="handleFileDrop(event)">
