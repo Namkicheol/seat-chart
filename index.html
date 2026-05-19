@@ -246,12 +246,65 @@ body::before{
     0 3px 0 #2E7D32,
     0 4px 12px rgba(46,125,50,.15)!important;
 }
+.seat.fx:hover{
+  background:linear-gradient(160deg,#F1FFF4,#DCEDC8,#C5E1A5)!important;
+  border-color:#388E3C!important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 3px 0 #2E7D32,
+    0 6px 16px rgba(46,125,50,.22)!important;
+}
+.seat.fx.sel{
+  background:linear-gradient(160deg,#FFFDE7,#FFF9C4,#FFE57F)!important;
+  border:2px solid var(--yb)!important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.9) inset,
+    0 3px 0 #2E7D32,
+    0 6px 16px rgba(249,168,37,.25)!important;
+}
 .seat.fx::after{content:'📌';border:none!important;width:auto!important;height:auto!important;
   position:absolute;font-size:10px;top:4px;right:6px;opacity:1;}
 .seat.empty{
   background:rgba(253,250,244,.5)!important;
   border:1.5px dashed var(--chalk2)!important;
   box-shadow:none!important;opacity:.5;
+}
+/* 추가된 자리 슬롯의 가상 placeholder — 드롭 가능한 빈 칸 (분명하게 보이도록) */
+.seat.ph-slot{
+  background:linear-gradient(160deg,rgba(255,249,196,.7),rgba(255,236,179,.6))!important;
+  border:2px dashed var(--wood)!important;
+  box-shadow:0 2px 0 rgba(139,94,60,.15) inset!important;
+  opacity:1;
+  cursor:copy;
+  position:relative;
+}
+.seat.ph-slot::before{
+  content:'＋';position:absolute;inset:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:34px;font-weight:900;color:rgba(139,94,60,.55);
+  pointer-events:none;line-height:1;
+}
+.seat.ph-slot .sname{
+  position:absolute;bottom:6px;left:0;right:0;
+  font-size:11px!important;color:var(--wood)!important;
+  font-family:'Gaegu',cursive;font-weight:700;
+  text-align:center;opacity:.85;
+}
+.seat.ph-slot:hover{
+  background:linear-gradient(160deg,#FFF59D,#FFE082)!important;
+  border-color:var(--wood-dark)!important;
+  transform:translateY(-2px);
+  box-shadow:0 4px 12px rgba(139,94,60,.18) inset,0 4px 14px rgba(44,24,16,.12)!important;
+}
+.seat.ph-slot.drag-over{
+  outline:3px dashed var(--wood-dark)!important;
+  outline-offset:3px;
+  background:linear-gradient(160deg,#FFF176,#FFD54F)!important;
+  border-color:var(--wood-dark)!important;
+  transform:scale(1.04);
+}
+@media print{
+  .seat.ph-slot{display:none!important}
 }
 /* ── PAIR MODE SEAT COLORS (via wrapper group) ── */
 .seat-pair-wrap.pg0 .seat:not(.fx):not(.sel):not(.empty){
@@ -303,17 +356,6 @@ body::before{
   border-color:var(--yb)!important;
   transform:scale(1.04);
 }
-/* 자식 요소가 드래그 이벤트를 가로채지 않도록 */
-.seat>*{pointer-events:none}
-.seat{-webkit-user-drag:element}
-
-/* ── BONUS ROW (자리 +1로 추가된 보너스 좌석) ── */
-.bonus-row{
-  display:flex;flex-wrap:wrap;justify-content:center;align-items:center;
-  gap:7px;margin-bottom:7px;
-}
-.bonus-row:empty{display:none}
-.bonus-row .seat{width:var(--sw,124px);height:var(--sh-seat,100px)}
 
 /* ── CLASS INFO BAR ── */
 .class-info-bar{
@@ -321,16 +363,25 @@ body::before{
   background:linear-gradient(180deg,rgba(253,250,244,.9),rgba(245,240,228,.9));
   border-radius:8px;border:1px solid var(--chalk2);
   box-shadow:0 1px 4px rgba(44,24,16,.07);
+  display:flex;gap:10px;align-items:center;
+}
+.class-info-field{display:flex;align-items:center;gap:6px;flex:1;min-width:0}
+.class-info-label{
+  font-family:'Gaegu',cursive;font-size:14px;font-weight:700;
+  color:var(--wood);flex-shrink:0;letter-spacing:1px;
+}
+.class-info-sep{
+  width:1px;height:20px;background:var(--chalk2);flex-shrink:0;
 }
 .class-info-input{
-  width:100%;background:transparent;border:none;outline:none;
+  flex:1;min-width:0;background:transparent;border:none;outline:none;
   font-family:'Gaegu',cursive;font-size:16px;font-weight:700;
-  color:var(--ink);letter-spacing:.5px;text-align:center;
+  color:var(--ink);letter-spacing:.5px;text-align:left;
 }
 .class-info-input::placeholder{color:var(--ink2);opacity:.45;font-weight:400}
-/* print class info */
-.class-info-print{display:none;font-family:'Gaegu',cursive;font-size:14px;font-weight:700;
-  color:rgba(245,240,232,.85);letter-spacing:1px;text-align:center;margin-top:4px;}
+/* print class info (인쇄 시 칠판 아래에 별도 배너로 표시) */
+.class-info-print{display:none;}
+.class-info-print .cip-sep{margin:0 12px;opacity:.5}
 
 /* ── RIGHT PANEL ── */
 .nlp{width:196px;min-width:176px;flex-shrink:0;display:flex;flex-direction:column;}
@@ -475,7 +526,7 @@ body::before{
 .msub strong{color:var(--wood)}
 
 /* table input */
-.etbl-wrap{max-height:360px;overflow-y:auto;border-radius:10px;border:1.5px solid var(--chalk2);overflow:hidden}
+.etbl-wrap{max-height:360px;overflow-y:auto;overflow-x:hidden;border-radius:10px;border:1.5px solid var(--chalk2);-webkit-overflow-scrolling:touch}
 .etbl{width:100%;border-collapse:collapse;font-size:13px}
 .etbl th{background:var(--chalk);padding:6px 8px;text-align:center;font-size:11px;color:var(--wood);font-weight:700;border-bottom:1.5px solid var(--chalk2)}
 .etbl td{padding:3px 5px;border-bottom:1px solid var(--chalk2)}
@@ -534,6 +585,60 @@ body::before{
 }
 .toast.show{opacity:1;transform:translateY(0)}
 
+/* ── 자리 +/- 미니 버튼 (사이드바) ── */
+.seat-adjust{display:flex;gap:6px;margin-top:8px}
+.seat-adjust .btn-mini{
+  flex:1;padding:6px 0;border-radius:8px;
+  border:1.5px solid var(--chalk2);background:white;
+  font-family:'Noto Sans KR',sans-serif;font-size:18px;font-weight:900;
+  color:var(--wood);cursor:pointer;transition:all .15s;
+  line-height:1;display:flex;align-items:center;justify-content:center;
+}
+.seat-adjust .btn-mini:hover{background:var(--cream);border-color:var(--wood-light);transform:translateY(-1px);box-shadow:0 2px 6px rgba(44,24,16,.1)}
+.seat-adjust .btn-mini.minus{color:var(--acc)}
+.seat-adjust .btn-mini.minus:hover{background:#FFEBEE;border-color:var(--acc)}
+
+/* ── 인쇄 미리보기 모달 ── */
+.print-modal{
+  background:var(--cream);border-radius:16px;padding:24px;
+  width:560px;max-width:96vw;max-height:90vh;overflow-y:auto;
+  box-shadow:0 20px 56px rgba(44,24,16,.22);border:1.5px solid var(--chalk2);
+}
+.print-modal-sub{
+  font-size:13px;color:var(--ink2);margin-bottom:14px;line-height:1.6;
+  background:rgba(255,249,196,.4);padding:9px 12px;border-radius:8px;
+  border:1px solid rgba(249,168,37,.25);
+}
+.print-info-group{
+  display:flex;gap:10px;margin-bottom:14px;
+  padding:12px;background:white;border-radius:10px;
+  border:1.5px solid var(--chalk2);
+}
+.print-info-group .pi-field{flex:1;display:flex;flex-direction:column;gap:4px}
+.print-info-group .pi-lbl{
+  font-family:'Gaegu',cursive;font-size:12px;font-weight:700;
+  color:var(--wood);letter-spacing:.5px;
+}
+.print-info-group .pi-input{
+  border:1.5px solid var(--chalk2);border-radius:7px;
+  padding:7px 10px;font-size:13px;font-family:inherit;
+  outline:none;background:#FDFAF4;color:var(--ink);font-weight:600;
+}
+.print-info-group .pi-input:focus{border-color:var(--wood);box-shadow:0 0 0 3px rgba(139,94,60,.09);background:white}
+.print-theme-section{margin-bottom:14px}
+.print-theme-section .pts-title{
+  font-family:'Gaegu',cursive;font-size:14px;font-weight:700;
+  color:var(--wood);margin-bottom:9px;
+}
+.print-theme-section .theme-swatches{justify-content:center}
+
+/* ══════════════════════════════════
+   PRINT — HIDE OVERLAYS/MODALS/TOAST
+══════════════════════════════════ */
+@media print{
+  .toast,.moverlay,.theme-panel{display:none!important;visibility:hidden!important}
+}
+
 /* ══════════════════════════════════
    PRINT BASE
 ══════════════════════════════════ */
@@ -545,7 +650,7 @@ body::before{
   html,body{background:white!important;background-image:none!important;
     width:297mm;height:210mm;overflow:hidden!important;margin:0!important;padding:0!important;}
   .layout{display:flex!important;width:285mm!important;height:198mm!important;overflow:hidden!important;}
-  .main{flex:1!important;padding:0 3mm!important;display:flex!important;flex-direction:column!important;height:198mm!important;overflow:hidden!important;}
+  .main{flex:1!important;padding:10mm 5mm 5mm!important;display:flex!important;flex-direction:column!important;height:198mm!important;overflow:hidden!important;}
   .cw{display:flex!important;flex-direction:row!important;gap:3mm!important;align-items:flex-start!important;flex:1!important;min-height:0!important;page-break-inside:avoid;break-inside:avoid;}
   .cls{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
   *{page-break-inside:avoid;break-inside:avoid}
@@ -576,15 +681,32 @@ body::before{
   .nlp{width:52mm!important;flex-shrink:0!important;display:flex!important;flex-direction:column!important;}
   .nlt-card{border-radius:6px!important;border-width:1.5px!important;flex:1!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;}
   .nlt-scroll{flex:1!important;overflow:hidden!important;}
-  .nlt-head{padding:6px 9px!important}
-  .nlt-head-txt{font-size:14px!important}
-  .nlt th{padding:4px 7px!important;font-size:11px!important}
-  .nlt td{padding:3px 7px!important;font-size:12px!important;border-bottom:1px solid #EDE8DC!important}
-  .nlt td:first-child{font-size:12px!important}
-  /* class info print */
+  .nlt-head{padding:5px 9px!important}
+  .nlt-head-txt{font-size:13px!important}
+  .nlt th{padding:var(--print-list-pad-v,3px) var(--print-list-pad-h,7px)!important;font-size:var(--print-list-head-font,11px)!important}
+  .nlt td{padding:var(--print-list-pad-v,3px) var(--print-list-pad-h,7px)!important;font-size:var(--print-list-font,12px)!important;border-bottom:1px solid #EDE8DC!important;line-height:1.25!important}
+  .nlt td:first-child{font-size:var(--print-list-font,12px)!important}
+  /* class info print — 칠판 아래 별도 배너 (인쇄 전용) */
   .class-info-bar{display:none!important}
   .class-info-input{display:none!important}
-  .class-info-print{display:block!important}
+  .class-info-print{
+    display:block!important;
+    margin-top:3mm!important;
+    padding:10px 22px 11px!important;
+    text-align:center!important;
+    font-family:'Gaegu',cursive!important;
+    font-size:22px!important;font-weight:700!important;
+    color:#3E2723!important;letter-spacing:2px!important;
+    background:linear-gradient(180deg,rgba(253,250,244,.95),rgba(245,240,228,.95))!important;
+    border:2px solid var(--wood)!important;
+    border-radius:6px!important;
+    box-shadow:0 2px 0 rgba(92,61,30,.18),0 1px 0 rgba(255,255,255,.6) inset!important;
+    flex-shrink:0!important;
+    white-space:nowrap!important;
+    line-height:1.15!important;
+  }
+  .class-info-print:empty{display:none!important}
+  .class-info-print .cip-sep{margin:0 16px!important;opacity:.4;color:var(--wood)!important;font-size:18px!important}
 }
 
 /* ── PRINT FRAME — L-bracket corner ornaments ── */
@@ -623,6 +745,11 @@ body::before{
   body.pt-0 .nlt td:first-child{color:#9E6800!important}
   body.pt-0 .nlt-card{border-color:#C8860A!important}
   body.pt-0 .seat.empty{background:#FFFDE7!important;border-color:#FFE082!important}
+  body.pt-0 .class-info-print{
+    background:linear-gradient(180deg,#FFFDE7,#FFF8E1)!important;
+    border-color:#C8860A!important;color:#5D4000!important;
+  }
+  body.pt-0 .class-info-print .cip-sep{color:#9E6800!important}
 }
 
 /* ══════════════════════════════════
@@ -650,6 +777,11 @@ body::before{
   body.pt-1 .nlt td:first-child{color:#C2185B!important}
   body.pt-1 .nlt-card{border-color:#F48FB1!important}
   body.pt-1 .seat.empty{background:#FFF8FA!important;border-color:#F8BBD9!important}
+  body.pt-1 .class-info-print{
+    background:linear-gradient(180deg,#FFF0F5,#FCE4EC)!important;
+    border-color:#E91E63!important;color:#880E4F!important;
+  }
+  body.pt-1 .class-info-print .cip-sep{color:#C2185B!important}
 }
 
 /* ══════════════════════════════════
@@ -677,6 +809,11 @@ body::before{
   body.pt-2 .nlt td:first-child{color:#2E7D32!important}
   body.pt-2 .nlt-card{border-color:#81C784!important}
   body.pt-2 .seat.empty{background:#F0FFF4!important;border-color:#C8E6C9!important}
+  body.pt-2 .class-info-print{
+    background:linear-gradient(180deg,#F1FFF4,#E8F5E9)!important;
+    border-color:#388E3C!important;color:#1B5E20!important;
+  }
+  body.pt-2 .class-info-print .cip-sep{color:#2E7D32!important}
 }
 
 /* ══════════════════════════════════
@@ -704,6 +841,11 @@ body::before{
   body.pt-3 .nlt td:first-child{color:#1565C0!important}
   body.pt-3 .nlt-card{border-color:#90CAF9!important}
   body.pt-3 .seat.empty{background:#EEF6FF!important;border-color:#BBDEFB!important}
+  body.pt-3 .class-info-print{
+    background:linear-gradient(180deg,#E3F2FD,#EEF6FF)!important;
+    border-color:#1565C0!important;color:#0D47A1!important;
+  }
+  body.pt-3 .class-info-print .cip-sep{color:#1565C0!important}
 }
 
 /* ══════════════════════════════════
@@ -731,6 +873,11 @@ body::before{
   body.pt-4 .nlt td:first-child{color:#5D4037!important}
   body.pt-4 .nlt-card{border-color:#A1887F!important}
   body.pt-4 .seat.empty{background:#FDF6E3!important;border-color:#D7CCC8!important}
+  body.pt-4 .class-info-print{
+    background:linear-gradient(180deg,#FDF6E3,#F5EACD)!important;
+    border-color:#795548!important;color:#3E2723!important;
+  }
+  body.pt-4 .class-info-print .cip-sep{color:#5D4037!important}
 }
 </style>
 </head>
@@ -747,22 +894,12 @@ body::before{
     <button class="btn btn-edit btn-sm" onclick="clearFixed()" title="모든 고정 해제">🔓 전체해제</button>
     <div class="hdr-sep"></div>
     <button class="btn btn-edit" onclick="openStudentModal()">👥 학생 편집</button>
-    <button class="btn btn-add" onclick="addOneSeat()">➕ 자리+1</button>
-    <button class="btn btn-add" onclick="removeLastSeat()" title="마지막 빈 자리 제거">➖ 자리-1</button>
-    <button class="btn btn-pair" id="pairBtnHdr" onclick="togglePairMode()">👥 짝 구분</button>
     <div class="hdr-sep"></div>
     <button class="btn btn-exp"  onclick="exportData()">📤 내보내기</button>
     <button class="btn btn-imp"  onclick="document.getElementById('importFile').click()">📥 불러오기</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <div class="hdr-sep"></div>
-    <div class="theme-panel-wrap">
-      <button class="btn btn-theme" onclick="toggleThemePanel()">🎨 인쇄 테마</button>
-      <div class="theme-panel no-print" id="themePanel">
-        <div class="theme-panel-title">인쇄 테마 선택</div>
-        <div class="theme-swatches" id="themeSwatches"></div>
-      </div>
-    </div>
-    <button class="btn btn-print" onclick="window.print()">🖨️ 인쇄</button>
+    <button class="btn btn-print" onclick="openPrintModal()">🖨️ 인쇄</button>
   </div>
 </div>
 
@@ -773,6 +910,10 @@ body::before{
       <div class="sb-lbl">🏫 좌석 설정</div>
       <div class="gc"><label>열 수 (가로)</label><input type="number" id="colCount" value="5" min="1" max="12" onchange="rebuildGrid()"></div>
       <div class="gc"><label>행 수 (세로)</label><input type="number" id="rowCount" value="5" min="1" max="12" onchange="rebuildGrid()"></div>
+      <div class="seat-adjust">
+        <button class="btn-mini" onclick="addOneSeat()" title="빈 자리 1개 추가">＋</button>
+        <button class="btn-mini minus" onclick="removeLastSeat()" title="마지막 빈 자리 제거">－</button>
+      </div>
       <div class="sb-stat">총 <strong id="totalSeats">25</strong>석 / <strong id="totalStudents">25</strong>명</div>
       <div class="sb-warn" id="overWarn" style="display:none">⚠️ 학생이 좌석보다 많아요!</div>
     </div>
@@ -789,7 +930,6 @@ body::before{
       <div class="sb-tip">
         • <b>자리 클릭</b> → 선택<br>
         • <b>두 번 클릭</b> → 교체<br>
-        • <b>드래그</b>로도 자리 교체<br>
         • 선택 후 <b>방향키</b>(↑↓←→)로 이동<br>
         • <b>📌 고정/해제</b> 버튼 사용<br>
         • 우클릭도 고정 가능<br>
@@ -808,20 +948,29 @@ body::before{
 
     <div class="cw">
       <div class="cls">
-        <div class="bonus-row" id="bonusRow"></div>
         <div class="seat-grid" id="seatGrid"></div>
         <div class="chalkboard-outer">
           <div class="chalkboard-inner">
             <div class="cb-text">칠 판</div>
             <div class="cb-sub">B L A C K B O A R D</div>
-            <div class="class-info-print" id="classInfoPrint"></div>
           </div>
           <div class="chalkboard-ledge"></div>
         </div>
+        <div class="class-info-print" id="classInfoPrint"></div>
         <div class="class-info-bar no-print">
-          <input class="class-info-input" id="classInfoInput" type="text"
-            placeholder="✏️ 예) 1학년 6반  |  담임: 홍길동 선생님"
-            oninput="syncClassInfo()"/>
+          <div class="class-info-field">
+            <span class="class-info-label">🏫 학반</span>
+            <input class="class-info-input" id="classGradeInput" type="text"
+              placeholder="예) 1학년 6반"
+              oninput="syncClassInfo()"/>
+          </div>
+          <div class="class-info-sep"></div>
+          <div class="class-info-field">
+            <span class="class-info-label">👨‍🏫 담임</span>
+            <input class="class-info-input" id="classTeacherInput" type="text"
+              placeholder="예) 홍길동 선생님"
+              oninput="syncClassInfo()"/>
+          </div>
         </div>
       </div>
 
@@ -900,6 +1049,37 @@ body::before{
   </div>
 </div>
 
+<!-- 인쇄 미리보기 모달 -->
+<div class="moverlay no-print" id="printModal">
+  <div class="print-modal">
+    <div class="mtitle">🖨️ 인쇄 설정</div>
+    <div class="print-modal-sub">
+      칠판 아래에 표시될 <strong>학반</strong>과 <strong>담임 이름</strong>을 입력하고, 원하는 <strong>인쇄 테마</strong>를 선택한 뒤 인쇄를 시작하세요.
+    </div>
+
+    <div class="print-info-group">
+      <div class="pi-field">
+        <span class="pi-lbl">🏫 학반</span>
+        <input class="pi-input" id="pmGradeInput" type="text" placeholder="예) 1학년 6반" oninput="syncPrintModalToClass()"/>
+      </div>
+      <div class="pi-field">
+        <span class="pi-lbl">👨‍🏫 담임</span>
+        <input class="pi-input" id="pmTeacherInput" type="text" placeholder="예) 홍길동 선생님" oninput="syncPrintModalToClass()"/>
+      </div>
+    </div>
+
+    <div class="print-theme-section">
+      <div class="pts-title">🎨 인쇄 테마</div>
+      <div class="theme-swatches" id="pmThemeSwatches"></div>
+    </div>
+
+    <div class="mfoot">
+      <button class="btn-apply" onclick="startPrint()">🖨️ 인쇄 시작</button>
+      <button class="btn-cancel" onclick="closeModal('printModal')">취소</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Print frame: L-bracket corner ornaments -->
@@ -929,47 +1109,63 @@ const THEMES=[
   {name:'레트로',dot:'linear-gradient(135deg,#F5EACD,#EDD9A3)',border:'#795548'},
 ];
 
-function buildThemeSwatches(){
-  const c=document.getElementById('themeSwatches');
+function buildThemeSwatches(containerId='pmThemeSwatches',silent=false){
+  const c=document.getElementById(containerId);
+  if(!c)return;
   c.innerHTML='';
   THEMES.forEach((t,i)=>{
     const el=document.createElement('div');
     el.className='tsw'+(printTheme===i?' active':'');
     el.innerHTML=`<div class="tsw-dot" style="background:${t.dot};border-color:${t.border}"></div><div class="tsw-lbl">${t.name}</div>`;
-    el.onclick=()=>setPrintTheme(i);
+    el.onclick=()=>setPrintTheme(i,silent);
     c.appendChild(el);
   });
 }
-function setPrintTheme(n){
+function setPrintTheme(n,silent){
   printTheme=n;
   document.body.className=document.body.className.replace(/\bpt-\d+\b/g,'').trim()+` pt-${n}`;
-  buildThemeSwatches();
+  buildThemeSwatches('pmThemeSwatches',true);
   autoSave();
-  toast(`🎨 ${THEMES[n].name} 테마로 설정됐어요`);
+  if(!silent)toast(`🎨 ${THEMES[n].name} 테마로 설정됐어요`);
 }
-function toggleThemePanel(btn){
-  const p=document.getElementById('themePanel');
-  if(p.classList.contains('open')){p.classList.remove('open');return;}
-  const b=document.querySelector('.btn-theme');
-  const rect=b.getBoundingClientRect();
-  p.style.top=(rect.bottom+8)+'px';
-  p.style.right=(window.innerWidth-rect.right)+'px';
-  p.classList.add('open');
-  buildThemeSwatches();
-}
-document.addEventListener('click',e=>{
-  const panel=document.getElementById('themePanel');
-  if(!panel.contains(e.target)&&!e.target.closest('.btn-theme')){
-    panel.classList.remove('open');
-  }
-});
 
 /* ── CLASS INFO ── */
-let classInfo='';
-function syncClassInfo(){
-  classInfo=document.getElementById('classInfoInput').value;
+let classGrade='',classTeacher='';
+function renderClassInfoPrint(){
   const p=document.getElementById('classInfoPrint');
-  if(p)p.textContent=classInfo;
+  if(!p)return;
+  const g=(classGrade||'').trim();
+  const t=(classTeacher||'').trim();
+  const teacherTxt=t?(t.includes('선생님')?t:(t+' 선생님')):'';
+  if(g&&teacherTxt){
+    p.innerHTML=`${g}<span class="cip-sep">|</span>담임: ${teacherTxt}`;
+  } else if(g){
+    p.textContent=g;
+  } else if(teacherTxt){
+    p.textContent=`담임: ${teacherTxt}`;
+  } else {
+    p.textContent='';
+  }
+}
+function syncClassInfo(){
+  classGrade=document.getElementById('classGradeInput').value;
+  classTeacher=document.getElementById('classTeacherInput').value;
+  // 인쇄 모달 입력값도 동기화
+  const pmG=document.getElementById('pmGradeInput');
+  const pmT=document.getElementById('pmTeacherInput');
+  if(pmG)pmG.value=classGrade;
+  if(pmT)pmT.value=classTeacher;
+  renderClassInfoPrint();
+  autoSave();
+}
+function syncPrintModalToClass(){
+  classGrade=document.getElementById('pmGradeInput').value;
+  classTeacher=document.getElementById('pmTeacherInput').value;
+  const g=document.getElementById('classGradeInput');
+  const t=document.getElementById('classTeacherInput');
+  if(g)g.value=classGrade;
+  if(t)t.value=classTeacher;
+  renderClassInfoPrint();
   autoSave();
 }
 
@@ -984,25 +1180,18 @@ function initDefault(){
 }
 function initSeats(){
   const t=getTotal();
-  const base=COLS*ROWS;
   seats=Array.from({length:t},()=>null);
-  // 메인 그리드(ROWS×COLS)에는 처음 base명을 우열(右→左) 배치
-  const inMain=Math.min(students.length,base);
-  for(let si=0;si<inMain;si++){
+  for(let si=0;si<students.length&&si<t;si++){
     const col=(COLS-1)-Math.floor(si/ROWS);
     const row=(ROWS-1)-(si%ROWS);
     const idx=row*COLS+col;
-    if(idx>=0&&idx<base)seats[idx]=si;
-  }
-  // 보너스 좌석(base 이상 인덱스)에는 base를 초과한 학생을 순서대로 배치
-  for(let si=base;si<students.length&&si<t;si++){
-    seats[si]=si;
+    if(idx>=0&&idx<t)seats[idx]=si;
   }
 }
 
 /* ── 저장 ── */
 function autoSave(){
-  try{localStorage.setItem('seatApp7',JSON.stringify({COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classInfo}));}catch(e){}
+  try{localStorage.setItem('seatApp7',JSON.stringify({COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher}));}catch(e){}
 }
 function loadLocal(){
   try{
@@ -1014,7 +1203,14 @@ function loadLocal(){
     fixed=new Set(d.fixed||[]);
     pairMode=!!d.pairMode;
     printTheme=d.printTheme||0;
-    classInfo=d.classInfo||'';
+    // 구버전(classInfo 단일 문자열) 호환
+    if(d.classGrade!==undefined||d.classTeacher!==undefined){
+      classGrade=d.classGrade||'';classTeacher=d.classTeacher||'';
+    } else if(d.classInfo){
+      const parts=String(d.classInfo).split('|').map(s=>s.trim());
+      classGrade=parts[0]||'';
+      classTeacher=(parts[1]||'').replace(/^담임\s*:?\s*/,'').trim();
+    }
     document.getElementById('colCount').value=COLS;
     document.getElementById('rowCount').value=ROWS;
     return true;
@@ -1023,7 +1219,7 @@ function loadLocal(){
 
 /* ── 내보내기/불러오기 ── */
 function exportData(){
-  const data={version:2,COLS,ROWS,students,seats,fixed:[...fixed],pairMode,printTheme};
+  const data={version:3,COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -1040,16 +1236,26 @@ function importData(e){
     try{
       const d=JSON.parse(ev.target.result);
       if(!d.students||!d.seats)throw new Error();
-      COLS=d.COLS||5;ROWS=d.ROWS||5;
+      COLS=d.COLS||5;ROWS=d.ROWS||5;bonus=d.bonus||0;
       students=d.students;seats=d.seats;
       fixed=new Set(d.fixed||[]);
       pairMode=!!d.pairMode;
       printTheme=d.printTheme||0;
+      if(d.classGrade!==undefined||d.classTeacher!==undefined){
+        classGrade=d.classGrade||'';classTeacher=d.classTeacher||'';
+      } else if(d.classInfo){
+        const parts=String(d.classInfo).split('|').map(s=>s.trim());
+        classGrade=parts[0]||'';
+        classTeacher=(parts[1]||'').replace(/^담임\s*:?\s*/,'').trim();
+      }
       document.getElementById('colCount').value=COLS;
       document.getElementById('rowCount').value=ROWS;
+      const g=document.getElementById('classGradeInput');if(g)g.value=classGrade;
+      const t=document.getElementById('classTeacherInput');if(t)t.value=classTeacher;
+      renderClassInfoPrint();
       sel=null;
       applyPairToggle();
-      setPrintTheme(printTheme);
+      setPrintTheme(printTheme,true);
       render();toast('📥 불러오기 완료!');
     }catch{toast('⚠️ 파일 형식 오류');}
   };
@@ -1082,9 +1288,7 @@ function calcSeatSize(){
     const ciH=ci?ci.offsetHeight+8:42;
     const gap=7;
     const padX=24;
-    // 보너스 좌석이 있으면 한 줄 더 차지하므로 행 수에 포함
-    const bonusRows=bonus>0?1:0;
-    const dispRows=ROWS+bonusRows;
+    const dispRows=Math.ceil(getTotal()/COLS);
     let gridW=mainW-nlpW-padX;
     const gridH=mainH-cbH-ciH-20;
     if(pairMode){
@@ -1106,18 +1310,12 @@ function calcSeatSize(){
 
 function renderGrid(){
   const total=getTotal();
-  const base=COLS*ROWS;
-  const dispRows=ROWS;
+  // bonus가 있으면(부분 행) 마지막 행을 끝까지 placeholder로 채워 드롭 가능하게
+  const fullRows=Math.ceil(total/COLS);
+  const dispRows=fullRows;
+  const partialRowStart=(fullRows-1)*COLS;
+  const hasPartialRow=bonus>0 && (total%COLS!==0);
   const g=document.getElementById('seatGrid');
-
-  // 보너스 좌석은 별도 행(#bonusRow)에 가운데 정렬로 렌더링
-  const br=document.getElementById('bonusRow');
-  if(br){
-    br.innerHTML='';
-    for(let i=base;i<total;i++){
-      br.appendChild(makeSeatEl(i));
-    }
-  }
 
   if(pairMode){
     g.style.display='flex';
@@ -1132,11 +1330,13 @@ function renderGrid(){
         const pairDiv=document.createElement('div');
         pairDiv.className=`seat-pair-wrap pg${pairGrp}`;
         const i1=r*COLS+c;
-        if(i1<total){pairDiv.appendChild(makeSeatEl(i1));}
+        if(i1<total)pairDiv.appendChild(makeSeatEl(i1));
+        else if(hasPartialRow&&r===fullRows-1&&i1>=partialRowStart)pairDiv.appendChild(makePhSlot(i1));
         else{const ph=document.createElement('div');ph.style.cssText=`width:var(--sw,124px);height:var(--sh-seat,100px);visibility:hidden`;pairDiv.appendChild(ph);}
         if(c+1<COLS){
           const i2=r*COLS+c+1;
-          if(i2<total){pairDiv.appendChild(makeSeatEl(i2));}
+          if(i2<total)pairDiv.appendChild(makeSeatEl(i2));
+          else if(hasPartialRow&&r===fullRows-1&&i2>=partialRowStart)pairDiv.appendChild(makePhSlot(i2));
           else{const ph=document.createElement('div');ph.style.cssText=`width:var(--sw,124px);height:var(--sh-seat,100px);visibility:hidden`;pairDiv.appendChild(ph);}
         }
         rowDiv.appendChild(pairDiv);
@@ -1154,6 +1354,8 @@ function renderGrid(){
         const i=r*COLS+c;
         if(i<total){
           g.appendChild(makeSeatEl(i));
+        } else if(hasPartialRow&&r===fullRows-1&&i>=partialRowStart){
+          g.appendChild(makePhSlot(i));
         } else {
           const ph=document.createElement('div');
           ph.style.cssText='visibility:hidden;pointer-events:none';
@@ -1164,6 +1366,47 @@ function renderGrid(){
     }
   }
   calcSeatSize();
+}
+
+/* 추가된 부분 행의 빈 슬롯 — 드롭하면 자리가 그 위치로 이동/확장됨 */
+function makePhSlot(targetIdx){
+  const el=document.createElement('div');
+  el.className='seat ph-slot';
+  el.dataset.phIdx=targetIdx;
+  el.innerHTML=`<div class="sname">자리 추가</div>`;
+  el.addEventListener('dragover',e=>{
+    e.preventDefault();
+    e.dataTransfer.dropEffect='move';
+    if(dragSrcIdx!==null)el.classList.add('drag-over');
+  });
+  el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
+  el.addEventListener('drop',e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    el.classList.remove('drag-over');
+    if(dragSrcIdx===null)return;
+    const src=dragSrcIdx;
+    // seats 배열을 targetIdx까지 확장 (중간 슬롯은 null로 채움)
+    while(seats.length<=targetIdx){
+      seats.push(null);
+      bonus++;
+    }
+    // 스왑
+    [seats[src],seats[targetIdx]]=[seats[targetIdx],seats[src]];
+    dragSrcIdx=null;
+    render();autoSave();
+    toast('↔️ 자리를 옮겼어요');
+  });
+  el.onclick=()=>{
+    // 클릭 시: 그 위치까지 빈 자리 확장
+    while(seats.length<=targetIdx){
+      seats.push(null);
+      bonus++;
+    }
+    render();autoSave();
+    toast(`➕ 빈 자리 추가 → 총 ${getTotal()}석`);
+  };
+  return el;
 }
 
 function makeSeatEl(i){
@@ -1188,12 +1431,15 @@ function makeSeatEl(i){
   el.oncontextmenu=e=>{e.preventDefault();toggleFixed(i);};
 
   // ── drag & drop ──
+  el.setAttribute('draggable','true');
   el.draggable=true;
   el.addEventListener('dragstart',e=>{
     dragSrcIdx=i;
     el.classList.add('dragging');
-    e.dataTransfer.effectAllowed='move';
-    e.dataTransfer.setData('text/plain',String(i));
+    if(e.dataTransfer){
+      e.dataTransfer.effectAllowed='move';
+      try{e.dataTransfer.setData('text/plain',String(i));}catch(_){}
+    }
   });
   el.addEventListener('dragend',()=>{
     dragSrcIdx=null;
@@ -1358,7 +1604,7 @@ function addOneSeat(){
   bonus++;
   seats.push(null);
   render();autoSave();
-  toast(`➕ 빈 자리 추가 → 총 ${getTotal()}석`);
+  toast(`➕ 빈 자리 추가 → 학생을 드래그해서 옮겨보세요`);
 }
 function removeLastSeat(){
   if(bonus<=0){toast('추가한 자리가 없어요');return;}
@@ -1407,7 +1653,11 @@ function addEditRowAt(i,id,name){
 function addEditRow(){
   const i=editRowCount++;
   addEditRowAt(i,'','');
-  // 번호 갱신 없이 그냥 추가
+  // 새 행으로 스크롤 + 이름 입력란 포커스
+  const wrap=document.querySelector('.etbl-wrap');
+  if(wrap)wrap.scrollTop=wrap.scrollHeight;
+  const nameInput=document.getElementById(`enm_${i}`);
+  if(nameInput)nameInput.focus();
 }
 
 function clearEditRows(){
@@ -1498,21 +1748,8 @@ function applyStudentsFromActiveTab(){
   if(!newStudents||newStudents.length===0){toast('⚠️ 학생이 없어요');return;}
 
   students=newStudents;
-  const stCount=students.filter(s=>s.name).length;
-  const base=COLS*ROWS;
-  // 학생이 좌석보다 많을 때: 한두 줄 정도는 보너스 좌석으로 처리(레이아웃 유지),
-  // 너무 많으면 행을 늘림(보너스가 한 줄 + COLS 이상 넘어가면 ROWS 확장)
-  bonus=0;
-  if(stCount>base){
-    const overflow=stCount-base;
-    if(overflow<=COLS&&ROWS<12){
-      bonus=overflow;
-    } else {
-      while(stCount>COLS*ROWS&&ROWS<12)ROWS++;
-      const rem=stCount-COLS*ROWS;
-      if(rem>0)bonus=rem;
-    }
-  }
+  // 학생이 좌석보다 많으면 행 자동 확장 (bonus는 보존)
+  while(students.filter(s=>s.name).length>getTotal()&&ROWS<12)ROWS++;
   document.getElementById('rowCount').value=ROWS;
   fixed.clear();sel=null;initSeats();
   closeModal('studentModal');render();autoSave();
@@ -1536,35 +1773,80 @@ function toast(m){
   t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);
 }
 
+/* ── 인쇄 모달 ── */
+function openPrintModal(){
+  // 토스트/상태바 즉시 숨김 (인쇄 화면에 잔재 안 남기기)
+  const toastEl=document.getElementById('toast');
+  if(toastEl)toastEl.classList.remove('show');
+  hideStatus();
+  // 현재 값으로 모달 입력 동기화
+  const pmG=document.getElementById('pmGradeInput');
+  const pmT=document.getElementById('pmTeacherInput');
+  if(pmG)pmG.value=classGrade||'';
+  if(pmT)pmT.value=classTeacher||'';
+  buildThemeSwatches('pmThemeSwatches',true);
+  openModal('printModal');
+}
+function startPrint(){
+  // 모달 입력값을 최종 반영
+  syncPrintModalToClass();
+  closeModal('printModal');
+  // 토스트 잔재 제거 후 인쇄
+  const toastEl=document.getElementById('toast');
+  if(toastEl)toastEl.classList.remove('show');
+  hideStatus();
+  setTimeout(()=>window.print(),120);
+}
+
 /* ── INIT ── */
 if(!loadLocal()){initDefault();initSeats();}
 applyPairToggle();
-setPrintTheme(printTheme);
-if(classInfo){
-  const ci=document.getElementById('classInfoInput');
-  const cp=document.getElementById('classInfoPrint');
-  if(ci)ci.value=classInfo;
-  if(cp)cp.textContent=classInfo;
-}
+setPrintTheme(printTheme,true);
+// 학반/담임 입력 초기값
+const _ciG=document.getElementById('classGradeInput');
+const _ciT=document.getElementById('classTeacherInput');
+if(_ciG)_ciG.value=classGrade||'';
+if(_ciT)_ciT.value=classTeacher||'';
+renderClassInfoPrint();
 render();
 document.fonts.ready.then(()=>calcSeatSize());
 setTimeout(()=>calcSeatSize(),120);
 
 window.addEventListener('beforeprint',()=>{
+  // 토스트/상태바 잔재 제거
+  const toastEl=document.getElementById('toast');
+  if(toastEl)toastEl.classList.remove('show');
+  hideStatus();
+
   const mmToPx=3.7795;
-  const listW=52*mmToPx;
-  const gridW=(285-52-6)*mmToPx;
-  const gridH=154*mmToPx;
+  // .main 좌우 padding 10mm (5+5), 우측 명단 52mm, gap 6mm
+  const gridW=(285-52-6-10)*mmToPx;
+  // .main 상하 padding(10+5=15) + 칠판(~12mm) + 배너(~17mm) + 마진(~6mm) = ~50mm 제외
+  const gridH=(198-50)*mmToPx;
   const gap=4*mmToPx;
+  // bonus 자리 포함하여 실제 표시 행 수 사용
+  const dispRows=Math.max(1,Math.ceil(getTotal()/COLS));
   const pw=Math.floor((gridW-gap*(COLS-1))/COLS);
-  const ph=Math.floor((gridH-gap*(ROWS-1))/ROWS);
-  const w=Math.max(48,pw);const h=Math.max(38,ph);
+  const ph=Math.floor((gridH-gap*(dispRows-1))/dispRows);
+  const w=Math.max(48,pw);const h=Math.max(34,ph);
   document.documentElement.style.setProperty('--pw',w+'px');
   document.documentElement.style.setProperty('--ph',h+'px');
   document.documentElement.style.setProperty('--pname',Math.max(11,Math.min(20,Math.floor(h*.27)))+'px');
   document.documentElement.style.setProperty('--pid',Math.max(8,Math.min(13,Math.floor(h*.16)))+'px');
   const g=document.getElementById('seatGrid');
-  if(g)g.style.gridTemplateColumns=`repeat(${COLS},${w}px)`;
+  if(g&&!pairMode)g.style.gridTemplateColumns=`repeat(${COLS},${w}px)`;
+
+  // 학생 명단 인쇄 크기 자동 축소 (튀어나오는 문제 방지)
+  const stCount=students.filter(s=>s.name).length;
+  let nameFont=12, headFont=11, padV=3, padH=7;
+  if(stCount>26){nameFont=11;padV=2;}
+  if(stCount>32){nameFont=10;padV=2;padH=6;}
+  if(stCount>38){nameFont=9;padV=1;padH=5;headFont=10;}
+  if(stCount>46){nameFont=8;padV=1;padH=4;headFont=9;}
+  document.documentElement.style.setProperty('--print-list-font',nameFont+'px');
+  document.documentElement.style.setProperty('--print-list-head-font',headFont+'px');
+  document.documentElement.style.setProperty('--print-list-pad-v',padV+'px');
+  document.documentElement.style.setProperty('--print-list-pad-h',padH+'px');
 });
 
 let resizeTimer;
@@ -1578,23 +1860,8 @@ document.addEventListener('keydown',e=>{
   const tag=(e.target&&e.target.tagName)||'';
   if(tag==='INPUT'||tag==='TEXTAREA')return;
   if(sel===null)return;
-  const base=COLS*ROWS;
-  // 보너스 좌석은 한 줄(가로)이므로 좌/우만 허용
-  if(sel>=base){
-    let nb=sel;
-    if(e.key==='ArrowLeft')nb=sel-1;
-    else if(e.key==='ArrowRight')nb=sel+1;
-    else if(e.key==='Escape'){e.preventDefault();clearSel();return;}
-    else return;
-    e.preventDefault();
-    if(nb<base||nb>=seats.length)return;
-    [seats[sel],seats[nb]]=[seats[nb],seats[sel]];
-    const prev=sel;sel=nb;
-    updateSeatEl(prev);updateSeatEl(nb);
-    autoSave();updatePinBtn();
-    return;
-  }
-  // 메인 그리드: 시각적으로 위가 r 증가(렌더가 bottom-up)
+  const total=getTotal();
+  const dispRows=Math.ceil(total/COLS);
   const r=Math.floor(sel/COLS),c=sel%COLS;
   let nr=r,nc=c;
   switch(e.key){
@@ -1606,8 +1873,9 @@ document.addEventListener('keydown',e=>{
     default:return;
   }
   e.preventDefault();
-  if(nr<0||nr>=ROWS||nc<0||nc>=COLS)return;
+  if(nr<0||nr>=dispRows||nc<0||nc>=COLS)return;
   const next=nr*COLS+nc;
+  if(next>=total)return;
   [seats[sel],seats[next]]=[seats[next],seats[sel]];
   const prev=sel;sel=next;
   updateSeatEl(prev);updateSeatEl(next);
