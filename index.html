@@ -1022,7 +1022,7 @@ body::before{
 
     <!-- 표 입력 탭 -->
     <div class="tab-pane active" id="tab-input">
-      <div class="msub">이름을 비워두면 빈 자리입니다. <strong>학생이 많으면 행을 늘리거나 붙여넣기를 이용하세요.</strong></div>
+      <div class="msub">이름만 입력해도 됩니다. <strong>학번은 비워두면 행 번호(01, 02 …)가 자동 부여됩니다.</strong></div>
       <div class="etbl-wrap">
         <table class="etbl">
           <thead><tr><th style="width:32px">번</th><th style="width:90px">학번</th><th>이름</th><th style="width:30px"></th></tr></thead>
@@ -1749,7 +1749,7 @@ function addEditRowAt(i,id,name){
   const tr=document.createElement('tr');
   tr.dataset.rowIdx=i;
   tr.innerHTML=`<td class="rlbl">${i+1}</td>
-    <td><input type="text" placeholder="학번" value="${id}" id="eid_${i}" maxlength="12"></td>
+    <td><input type="text" placeholder="(선택)" value="${id}" id="eid_${i}" maxlength="12"></td>
     <td><input type="text" placeholder="이름" value="${name}" id="enm_${i}" maxlength="10"></td>
     <td class="rdel"><button type="button" class="btn-del-row" title="행 삭제" onclick="delEditRow(${i})">✕</button></td>`;
   tb.appendChild(tr);
@@ -1843,9 +1843,13 @@ function applyStudentsFromActiveTab(){
   if(activeTab==='input'){
     newStudents=[];
     const rows=document.querySelectorAll('#editBody tr');
+    let autoNum=0;
     rows.forEach(tr=>{
-      const id=tr.querySelector('input[id^="eid_"]')?.value.trim()||'';
+      autoNum++;
+      let id=tr.querySelector('input[id^="eid_"]')?.value.trim()||'';
       const name=tr.querySelector('input[id^="enm_"]')?.value.trim()||'';
+      // 학번 비어있으면 행 번호로 자동 부여 (학번 입력은 선택사항)
+      if(!id)id=String(autoNum).padStart(2,'0');
       newStudents.push({id,name});
     });
     // trim trailing empties
