@@ -113,6 +113,8 @@ body::before{
 .fdot{width:7px;height:7px;border-radius:50%;background:#2E7D32;margin-left:auto;flex-shrink:0}
 .sb-tip{font-size:11px;color:var(--ink2);line-height:1.9}
 .sb-tip b{color:var(--wood)}
+.tip-hl{display:inline-block;background:linear-gradient(135deg,#FFF59D,#FFE082);color:#5D4037;padding:2px 7px;border-radius:6px;border:1.5px solid #F9A825;font-weight:700;box-shadow:0 1px 3px rgba(249,168,37,.25)}
+.tip-hl b{color:#5D4037!important}
 
 /* ── PAIR TOGGLE ── */
 .pair-toggle{
@@ -444,7 +446,7 @@ body::before{
   border:1.5px solid #FF8A65;
 }
 .btn-undo:hover:not(:disabled){background:#FFCC80;transform:translateY(-1px);box-shadow:0 4px 10px rgba(255,138,101,.3)}
-.btn-undo:disabled{cursor:default;opacity:.4;transform:none!important;box-shadow:none}
+.btn-undo:disabled{cursor:default;transform:none!important;box-shadow:none}
 .btn-edit{
   background:rgba(245,240,232,.8);color:var(--ink2);
   border:1.5px solid var(--chalk2);
@@ -944,9 +946,9 @@ body::before{
     <div class="sb-sec">
       <div class="sb-lbl">💡 사용법</div>
       <div class="sb-tip">
+        • <span class="tip-hl"><b>🖐️ 드래그&드롭</b>으로 자리 교체</span><br>
         • <b>자리 클릭</b> → 선택<br>
         • <b>두 번 클릭</b> → 교체<br>
-        • <b>드래그&드롭</b>으로 자리 교체<br>
         • 선택 후 <b>방향키</b>(↑↓←→)로 이동<br>
         • <b>↩️ 실행취소</b>로 직전 작업 되돌리기<br>
         • <b>📌 고정/해제</b> 버튼 사용<br>
@@ -1935,9 +1937,10 @@ window.addEventListener('beforeprint',()=>{
   const mmToPx=3.7795;
   // .main 좌우 padding 10mm (5+5), 우측 명단 52mm, gap 6mm
   const gridW=(285-52-3-16)*mmToPx;
-  // .cls 가용 = layout(198) - main padding(13) - chalkboard+margin(15) - cip(학반 입력 시 20, 미입력 시 0)
+  // .cls 가용 = layout(198) - main padding(13) - chalkboard+margin(15) - cip(학반 입력 시 18, 미입력 시 0)
+  // 더 공격적으로 카드 키워 페이지 여백 최소화
   const hasBanner=!!(classGrade||classTeacher);
-  const nonGridMm=hasBanner?48:28;
+  const nonGridMm=hasBanner?42:25;
   const gridH=(198-nonGridMm)*mmToPx;
   const gap=4*mmToPx;
   // bonus 자리 포함하여 실제 표시 행 수 사용
