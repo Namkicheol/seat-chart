@@ -1402,6 +1402,10 @@ function makePhSlot(targetIdx){
       if(data!==''){const n=parseInt(data,10);if(!isNaN(n))src=n;}
     }
     if(src===null||src<0||src>=seats.length)return;
+    if(fixed.has(src)){
+      dragSrcIdx=null;
+      toast('📌 고정된 자리는 옮길 수 없어요');return;
+    }
     // seats 배열을 targetIdx까지 확장 (중간 슬롯은 null로 채움)
     while(seats.length<=targetIdx){
       seats.push(null);
@@ -1479,6 +1483,10 @@ function makeSeatEl(i){
       if(data!==''){const n=parseInt(data,10);if(!isNaN(n))src=n;}
     }
     if(src===null||src===i||src<0||src>=seats.length)return;
+    if(fixed.has(src)||fixed.has(i)){
+      dragSrcIdx=null;
+      toast('📌 고정된 자리는 교체할 수 없어요');return;
+    }
     [seats[src],seats[i]]=[seats[i],seats[src]];
     dragSrcIdx=null;
     updateSeatEl(src);updateSeatEl(i);
@@ -1536,6 +1544,10 @@ function clickSeat(i){
     clearSel();
   } else {
     const prev=sel;
+    if(fixed.has(prev)||fixed.has(i)){
+      toast('📌 고정된 자리는 교체할 수 없어요');
+      clearSel();return;
+    }
     [seats[prev],seats[i]]=[seats[i],seats[prev]];
     sel=null;hideStatus();
     updateSeatEl(prev);updateSeatEl(i);
@@ -1917,6 +1929,7 @@ document.addEventListener('keydown',e=>{
   if(nr<0||nr>=dispRows||nc<0||nc>=COLS)return;
   const next=nr*COLS+nc;
   if(next>=total)return;
+  if(fixed.has(sel)||fixed.has(next)){toast('📌 고정된 자리는 교체할 수 없어요');return;}
   [seats[sel],seats[next]]=[seats[next],seats[sel]];
   const prev=sel;sel=next;
   updateSeatEl(prev);updateSeatEl(next);
