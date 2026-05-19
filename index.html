@@ -349,6 +349,8 @@ body::before{
 .seat[draggable="true"]{cursor:grab}
 .seat[draggable="true"]:active{cursor:grabbing}
 .seat.dragging{opacity:.3;transform:scale(.95);pointer-events:none}
+/* 자식 요소가 드래그 이벤트를 가로채지 않도록 */
+.seat>*{pointer-events:none}
 .seat.drag-over{
   outline:2.5px dashed var(--wood)!important;
   outline-offset:3px;
@@ -1180,12 +1182,19 @@ function initDefault(){
 }
 function initSeats(){
   const t=getTotal();
+  const base=COLS*ROWS;
   seats=Array.from({length:t},()=>null);
-  for(let si=0;si<students.length&&si<t;si++){
+  // 메인 그리드(ROWS×COLS)에는 처음 base명을 우열(右→左) 배치
+  const inMain=Math.min(students.length,base);
+  for(let si=0;si<inMain;si++){
     const col=(COLS-1)-Math.floor(si/ROWS);
     const row=(ROWS-1)-(si%ROWS);
     const idx=row*COLS+col;
-    if(idx>=0&&idx<t)seats[idx]=si;
+    if(idx>=0&&idx<base)seats[idx]=si;
+  }
+  // 보너스 좌석(base 이상 인덱스)에는 base를 초과한 학생을 순서대로 배치
+  for(let si=base;si<students.length&&si<t;si++){
+    seats[si]=si;
   }
 }
 
@@ -1748,9 +1757,9 @@ function applyStudentsFromActiveTab(){
   if(!newStudents||newStudents.length===0){toast('⚠️ 학생이 없어요');return;}
 
   students=newStudents;
-  // 학생이 좌석보다 많으면 행 자동 확장 (bonus는 보존)
-  while(students.filter(s=>s.name).length>getTotal()&&ROWS<12)ROWS++;
-  document.getElementById('rowCount').value=ROWS;
+  // 학생이 좌석보다 많으면 bonus 좌석으로 확장 (ROWS는 그대로)
+  const need=students.filter(s=>s.name).length;
+  while(need>getTotal())bonus++;
   fixed.clear();sel=null;initSeats();
   closeModal('studentModal');render();autoSave();
   toast(`✅ ${students.filter(s=>s.name).length}명 저장 완료!`);
@@ -1820,9 +1829,9 @@ window.addEventListener('beforeprint',()=>{
 
   const mmToPx=3.7795;
   // .main 좌우 padding 10mm (5+5), 우측 명단 52mm, gap 6mm
-  const gridW=(285-52-6-10)*mmToPx;
-  // .main 상하 padding(10+5=15) + 칠판(~12mm) + 배너(~17mm) + 마진(~6mm) = ~50mm 제외
-  const gridH=(198-50)*mmToPx;
+  const gridW=(285-52-3-10)*mmToPx;
+  // .main 상하 padding(10+5=15) + 칠판(~14mm) + 배너(~17mm) + 마진/여유(~12mm) = ~58mm 제외
+  const gridH=(198-58)*mmToPx;
   const gap=4*mmToPx;
   // bonus 자리 포함하여 실제 표시 행 수 사용
   const dispRows=Math.max(1,Math.ceil(getTotal()/COLS));
