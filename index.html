@@ -536,6 +536,9 @@ body::before{
 .etbl th{background:var(--chalk);padding:6px 8px;text-align:center;font-size:11px;color:var(--wood);font-weight:700;border-bottom:1.5px solid var(--chalk2)}
 .etbl td{padding:3px 5px;border-bottom:1px solid var(--chalk2)}
 .etbl td.rlbl{text-align:center;font-size:11px;color:var(--ink2);font-weight:700;padding-right:3px;white-space:nowrap}
+.etbl td.rdel{text-align:center;padding:3px 4px}
+.btn-del-row{width:24px;height:24px;border:1.5px solid rgba(229,57,53,.3);background:rgba(255,235,238,.6);color:#C62828;border-radius:6px;font-size:13px;font-weight:900;cursor:pointer;line-height:1;padding:0;transition:all .15s}
+.btn-del-row:hover{background:#E53935;color:white;border-color:#C62828;transform:scale(1.08)}
 .etbl input{width:100%;border:1.5px solid var(--chalk2);border-radius:6px;padding:4px 7px;font-size:12px;font-family:inherit;outline:none;background:white;}
 .etbl input:focus{border-color:var(--wood);box-shadow:0 0 0 2px rgba(139,94,60,.1)}
 
@@ -1010,7 +1013,7 @@ body::before{
       <div class="msub">이름을 비워두면 빈 자리입니다. <strong>학생이 많으면 행을 늘리거나 붙여넣기를 이용하세요.</strong></div>
       <div class="etbl-wrap">
         <table class="etbl">
-          <thead><tr><th style="width:32px">번</th><th style="width:90px">학번</th><th>이름</th></tr></thead>
+          <thead><tr><th style="width:32px">번</th><th style="width:90px">학번</th><th>이름</th><th style="width:30px"></th></tr></thead>
           <tbody id="editBody"></tbody>
         </table>
       </div>
@@ -1697,10 +1700,22 @@ function buildEditTable(){
 function addEditRowAt(i,id,name){
   const tb=document.getElementById('editBody');
   const tr=document.createElement('tr');
+  tr.dataset.rowIdx=i;
   tr.innerHTML=`<td class="rlbl">${i+1}</td>
     <td><input type="text" placeholder="학번" value="${id}" id="eid_${i}" maxlength="12"></td>
-    <td><input type="text" placeholder="이름" value="${name}" id="enm_${i}" maxlength="10"></td>`;
+    <td><input type="text" placeholder="이름" value="${name}" id="enm_${i}" maxlength="10"></td>
+    <td class="rdel"><button type="button" class="btn-del-row" title="행 삭제" onclick="delEditRow(${i})">✕</button></td>`;
   tb.appendChild(tr);
+}
+
+function delEditRow(i){
+  const tb=document.getElementById('editBody');
+  const tr=tb.querySelector(`tr[data-row-idx="${i}"]`);
+  if(tr)tr.remove();
+  // 남은 행들의 번호 라벨 갱신 (id 속성은 그대로 유지)
+  Array.from(tb.querySelectorAll('tr')).forEach((row,n)=>{
+    const lbl=row.querySelector('.rlbl');if(lbl)lbl.textContent=n+1;
+  });
 }
 
 function addEditRow(){
@@ -1781,9 +1796,9 @@ function applyStudentsFromActiveTab(){
   if(activeTab==='input'){
     newStudents=[];
     const rows=document.querySelectorAll('#editBody tr');
-    rows.forEach((_,i)=>{
-      const id=document.getElementById(`eid_${i}`)?.value.trim()||'';
-      const name=document.getElementById(`enm_${i}`)?.value.trim()||'';
+    rows.forEach(tr=>{
+      const id=tr.querySelector('input[id^="eid_"]')?.value.trim()||'';
+      const name=tr.querySelector('input[id^="enm_"]')?.value.trim()||'';
       newStudents.push({id,name});
     });
     // trim trailing empties
