@@ -349,11 +349,11 @@ body::before{
 .seat.anim{animation:pop .32s cubic-bezier(.34,1.56,.64,1)}
 
 /* ── DRAG & DROP ── */
-.seat[draggable="true"]{cursor:grab}
+.seat[draggable="true"]{cursor:grab;-webkit-user-drag:element}
 .seat[draggable="true"]:active{cursor:grabbing}
 .seat.dragging{opacity:.3;transform:scale(.95);pointer-events:none}
 /* 자식 요소가 드래그 이벤트를 가로채지 않도록 */
-.seat>*{pointer-events:none}
+.seat>*{pointer-events:none;-webkit-user-drag:none}
 .seat.drag-over{
   outline:2.5px dashed var(--wood)!important;
   outline-offset:3px;
@@ -1780,8 +1780,9 @@ function applyStudentsFromActiveTab(){
   if(!newStudents||newStudents.length===0){toast('⚠️ 학생이 없어요');return;}
 
   students=newStudents;
-  // 좌석 자동 확장 없음 — 학생이 좌석보다 많으면 미배치 상태로 둠
-  // 사용자가 사이드바 + 버튼을 눌러 보너스 좌석을 만들면 그때 자동 배치됨
+  // 학생이 좌석보다 많으면 bonus 좌석으로 자동 확장 (ROWS는 그대로)
+  const need=students.filter(s=>s.name).length;
+  while(need>getTotal())bonus++;
   fixed.clear();sel=null;initSeats();
   closeModal('studentModal');render();autoSave();
   toast(`✅ ${students.filter(s=>s.name).length}명 저장 완료!`);
