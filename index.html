@@ -106,6 +106,9 @@ body::before{
   font-size:11px;color:var(--ink2);
 }
 .chip.fx{background:rgba(46,125,50,.07);border-color:rgba(46,125,50,.2)}
+.chip.unplaced{background:rgba(229,57,53,.08);border-color:rgba(229,57,53,.28);color:#C62828}
+.chip.unplaced .nbadge{color:#C62828}
+.udot{margin-left:auto;color:#C62828;font-size:13px;font-weight:700;flex-shrink:0}
 .nbadge{font-size:10px;font-weight:700;color:var(--wood);min-width:20px}
 .fdot{width:7px;height:7px;border-radius:50%;background:#2E7D32;margin-left:auto;flex-shrink:0}
 .sb-tip{font-size:11px;color:var(--ink2);line-height:1.9}
@@ -1412,8 +1415,9 @@ function makePhSlot(targetIdx){
       seats.push(null);
       bonus++;
     }
+    const filled=fillEmptySeats();
     render();autoSave();
-    toast(`➕ 빈 자리 추가 → 총 ${getTotal()}석`);
+    toast(filled>0?`➕ 빈 자리 추가 → 미배치 학생 ${filled}명 자동 배치`:`➕ 빈 자리 추가 → 총 ${getTotal()}석`);
   };
   return el;
 }
@@ -1503,10 +1507,13 @@ function renderSidebar(){
   const l=document.getElementById('sidebarList');l.innerHTML='';
   students.forEach((s,i)=>{
     if(!s.name)return;
-    const si=seats.indexOf(i);const isFx=si>=0&&fixed.has(si);
+    const si=seats.indexOf(i);
+    const isFx=si>=0&&fixed.has(si);
+    const isUnplaced=si<0;
     const d=document.createElement('div');
-    d.className='chip'+(isFx?' fx':'');
-    d.innerHTML=`<span class="nbadge">${s.id}</span><span>${s.name}</span>${isFx?'<span class="fdot"></span>':''}`;
+    d.className='chip'+(isFx?' fx':'')+(isUnplaced?' unplaced':'');
+    const tag=isUnplaced?'<span class="udot" title="좌석 미배치">⊘</span>':'';
+    d.innerHTML=`<span class="nbadge">${s.id}</span><span>${s.name}</span>${isFx?'<span class="fdot"></span>':''}${tag}`;
     l.appendChild(d);
   });
 }
@@ -1612,8 +1619,24 @@ function rebuildGrid(){
 function addOneSeat(){
   bonus++;
   seats.push(null);
+  const filled=fillEmptySeats();
   render();autoSave();
-  toast(`➕ 빈 자리 추가 → 학생을 드래그해서 옮겨보세요`);
+  toast(filled>0?`➕ 빈 자리 추가 → 미배치 학생 ${filled}명 자동 배치`:`➕ 빈 자리 추가`);
+}
+
+// 미배치 학생(students에는 있는데 seats에 없는 학생)을 빈 좌석에 순서대로 배치
+function fillEmptySeats(){
+  const placed=new Set();
+  seats.forEach(v=>{if(v!==null)placed.add(v);});
+  const unplaced=[];
+  for(let si=0;si<students.length;si++){
+    if(!placed.has(si)&&students[si]&&students[si].name)unplaced.push(si);
+  }
+  let count=0;
+  for(let i=0;i<seats.length&&unplaced.length>0;i++){
+    if(seats[i]===null){seats[i]=unplaced.shift();count++;}
+  }
+  return count;
 }
 function removeLastSeat(){
   if(bonus<=0){toast('추가한 자리가 없어요');return;}
@@ -1757,9 +1780,8 @@ function applyStudentsFromActiveTab(){
   if(!newStudents||newStudents.length===0){toast('⚠️ 학생이 없어요');return;}
 
   students=newStudents;
-  // 학생이 좌석보다 많으면 bonus 좌석으로 확장 (ROWS는 그대로)
-  const need=students.filter(s=>s.name).length;
-  while(need>getTotal())bonus++;
+  // 좌석 자동 확장 없음 — 학생이 좌석보다 많으면 미배치 상태로 둠
+  // 사용자가 사이드바 + 버튼을 눌러 보너스 좌석을 만들면 그때 자동 배치됨
   fixed.clear();sel=null;initSeats();
   closeModal('studentModal');render();autoSave();
   toast(`✅ ${students.filter(s=>s.name).length}명 저장 완료!`);
