@@ -549,6 +549,8 @@ body::before{
 .etbl.hide-id td:nth-child(2) input{display:none}
 .etbl.hide-id th:nth-child(2){width:42px;font-size:10px;color:var(--ink2);opacity:.6}
 #idTh:hover{background:var(--cream)}
+.link-toggle-id{display:inline-block;margin-left:8px;font-size:12px;color:var(--wood);text-decoration:none;border:1.5px solid var(--chalk2);padding:3px 9px;border-radius:6px;background:var(--cream);font-weight:600}
+.link-toggle-id:hover{background:#FFF9C4;border-color:var(--yb)}
 .etbl td.rdel{text-align:center;padding:3px 4px}
 .btn-del-row{width:24px;height:24px;border:1.5px solid rgba(229,57,53,.3);background:rgba(255,235,238,.6);color:#C62828;border-radius:6px;font-size:13px;font-weight:900;cursor:pointer;line-height:1;padding:0;transition:all .15s}
 .btn-del-row:hover{background:#E53935;color:white;border-color:#C62828;transform:scale(1.08)}
@@ -961,7 +963,7 @@ body::before{
     <div class="sb-sec">
       <div class="sb-lbl">💡 사용법</div>
       <div class="sb-tip">
-        • <span class="tip-hl"><b>🖐️ 드래그&드롭</b>으로 자리 교체</span><br>
+        <span class="tip-hl"><b>🖐️ 드래그&드롭</b>으로 자리 교체</span><br>
         • <b>자리 클릭</b> → 선택<br>
         • <b>두 번 클릭</b> → 교체<br>
         • 선택 후 <b>방향키</b>(↑↓←→)로 이동<br>
@@ -1037,7 +1039,7 @@ body::before{
 
     <!-- 표 입력 탭 -->
     <div class="tab-pane active" id="tab-input">
-      <div class="msub">이름만 입력해도 됩니다. <strong>학번은 비워두면 행 번호(01, 02 …)가 자동 부여됩니다.</strong></div>
+      <div class="msub">이름만 입력해도 됩니다. <strong>학번은 비우면 행 번호(01, 02 …)가 자동 부여됩니다.</strong> <a href="#" class="link-toggle-id" onclick="event.preventDefault();toggleIdColumn()">🔢 학번 입력 표시/숨김</a></div>
       <div class="etbl-wrap">
         <table class="etbl">
           <thead><tr><th style="width:32px">번</th><th style="width:90px;cursor:pointer;user-select:none" id="idTh" onclick="toggleIdColumn()" title="클릭하면 학번 입력 칸을 숨기거나 다시 보일 수 있어요">학번 ▼</th><th>이름</th><th style="width:30px"></th></tr></thead>
@@ -1746,9 +1748,16 @@ function openStudentModal(){
   // tab-input 채우기
   buildEditTable();
   switchTab('input');
-  // 학번 컬럼 sticky 상태 복원
+  // 학번 컬럼: default 숨김. 학생 중 한 명이라도 자동 부여(01,02…) 형식 외의 학번을 가지면 자동 펼침.
   try{
-    const hide=localStorage.getItem('hide-id-col')==='1';
+    const stored=localStorage.getItem('hide-id-col');
+    const hasCustomId=students.some((s,idx)=>{
+      if(!s||!s.id)return false;
+      const autoId=String(idx+1).padStart(2,'0');
+      return s.id!==autoId;
+    });
+    // localStorage 값이 명시되어 있으면 그것 우선, 없으면: custom 학번 있으면 표시, 없으면 숨김
+    const hide=(stored===null)?!hasCustomId:(stored==='1');
     const tbl=document.querySelector('.etbl');
     tbl.classList.toggle('hide-id',hide);
     const th=document.getElementById('idTh');
