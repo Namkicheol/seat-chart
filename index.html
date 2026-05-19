@@ -659,7 +659,7 @@ body::before{
     width:297mm;height:210mm;overflow:hidden!important;margin:0!important;padding:0!important;}
   .layout{display:flex!important;width:285mm!important;height:198mm!important;overflow:hidden!important;}
   .main{flex:1!important;padding:10mm 5mm 5mm!important;display:flex!important;flex-direction:column!important;height:198mm!important;overflow:hidden!important;}
-  .cw{display:flex!important;flex-direction:row!important;gap:3mm!important;align-items:flex-start!important;flex:1!important;min-height:0!important;page-break-inside:avoid;break-inside:avoid;}
+  .cw{display:flex!important;flex-direction:row!important;gap:3mm!important;align-items:stretch!important;flex:1!important;min-height:0!important;page-break-inside:avoid;break-inside:avoid;}
   .cls{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
   *{page-break-inside:avoid;break-inside:avoid}
   .status-bar{display:none!important;visibility:hidden!important}
@@ -1889,8 +1889,11 @@ window.addEventListener('beforeprint',()=>{
   const mmToPx=3.7795;
   // .main 좌우 padding 10mm (5+5), 우측 명단 52mm, gap 6mm
   const gridW=(285-52-3-10)*mmToPx;
-  // .main 상하 padding(10+5=15) + 칠판(~14mm) + 배너(~17mm) + 마진/여유(~12mm) = ~58mm 제외
-  const gridH=(198-58)*mmToPx;
+  // .cls 가용 = layout(198) - main padding(15) - chalkboard+margin(15) - cip(학반 입력 시 20, 미입력 시 0)
+  // .cw align-items:stretch이므로 cls 가용공간을 카드로 다 채워 빈공간 최소화
+  const hasBanner=!!(classGrade||classTeacher);
+  const nonGridMm=hasBanner?50:30;
+  const gridH=(198-nonGridMm)*mmToPx;
   const gap=4*mmToPx;
   // bonus 자리 포함하여 실제 표시 행 수 사용
   const dispRows=Math.max(1,Math.ceil(getTotal()/COLS));
