@@ -353,7 +353,7 @@ body::before{
 .seat[draggable="true"]:active{cursor:grabbing}
 .seat.dragging{opacity:.3;transform:scale(.95);pointer-events:none}
 /* 자식 요소가 드래그 이벤트를 가로채지 않도록 */
-.seat>*{pointer-events:none;-webkit-user-drag:none}
+.seat>*{pointer-events:none}
 .seat.drag-over{
   outline:2.5px dashed var(--wood)!important;
   outline-offset:3px;
@@ -687,7 +687,7 @@ body::before{
 
   /* right name list print */
   .nlp{width:52mm!important;flex-shrink:0!important;display:flex!important;flex-direction:column!important;}
-  .nlt-card{border-radius:6px!important;border-width:1.5px!important;flex:1!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;}
+  .nlt-card{border-radius:6px!important;border-width:1.5px!important;flex:1!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:transparent!important;}
   .nlt-scroll{flex:1!important;overflow:hidden!important;}
   .nlt-head{padding:5px 9px!important}
   .nlt-head-txt{font-size:13px!important}
@@ -1458,6 +1458,8 @@ function makeSeatEl(i){
   el.setAttribute('draggable','true');
   el.draggable=true;
   el.addEventListener('dragstart',e=>{
+    // 클릭 swap 모드(sel)와 충돌 방지
+    if(sel!==null){const prev=sel;sel=null;hideStatus();updateSeatEl(prev);updatePinBtn();}
     dragSrcIdx=i;
     el.classList.add('dragging');
     if(e.dataTransfer){
@@ -1907,13 +1909,19 @@ window.addEventListener('beforeprint',()=>{
   const g=document.getElementById('seatGrid');
   if(g&&!pairMode)g.style.gridTemplateColumns=`repeat(${COLS},${w}px)`;
 
-  // 학생 명단 인쇄 크기 자동 축소 (튀어나오는 문제 방지)
+  // 학생 명단 인쇄 — 가용 세로공간을 (행수+header) 균등 분할 → padV 동적 계산
   const stCount=students.filter(s=>s.name).length;
-  let nameFont=12, headFont=11, padV=3, padH=7;
-  if(stCount>26){nameFont=11;padV=2;}
-  if(stCount>32){nameFont=10;padV=2;padH=6;}
-  if(stCount>38){nameFont=9;padV=1;padH=5;headFont=10;}
-  if(stCount>46){nameFont=8;padV=1;padH=4;headFont=9;}
+  let nameFont=12, headFont=11, padH=7;
+  if(stCount>32){nameFont=10;padH=6;}
+  if(stCount>40){nameFont=9;padH=5;headFont=10;}
+  if(stCount>48){nameFont=8;padH=4;headFont=9;}
+  // nlp는 cw stretch로 main 가용공간(198-15) 전체 차지. nlt-head 8mm 제외.
+  const nlpAvailMm=198-15;
+  const tableAvailMm=nlpAvailMm-8;
+  const perRowMm=tableAvailMm/(stCount+1);
+  const perRowPx=perRowMm*mmToPx;
+  const lineH=nameFont*1.25;
+  const padV=Math.max(1,Math.floor((perRowPx-lineH-1)/2));
   document.documentElement.style.setProperty('--print-list-font',nameFont+'px');
   document.documentElement.style.setProperty('--print-list-head-font',headFont+'px');
   document.documentElement.style.setProperty('--print-list-pad-v',padV+'px');
