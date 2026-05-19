@@ -439,6 +439,12 @@ body::before{
 .btn-pin:hover{background:#FFF59D;transform:translateY(-1px)}
 .btn-pin.is-fixed{background:#C8E6C9;color:#1B5E20;border-color:#2E7D32}
 .btn-pin:disabled{cursor:default;transform:none!important;box-shadow:none}
+.btn-undo{
+  background:#FFE0B2;color:#5D4037;
+  border:1.5px solid #FF8A65;
+}
+.btn-undo:hover:not(:disabled){background:#FFCC80;transform:translateY(-1px);box-shadow:0 4px 10px rgba(255,138,101,.3)}
+.btn-undo:disabled{cursor:default;opacity:.4;transform:none!important;box-shadow:none}
 .btn-edit{
   background:rgba(245,240,232,.8);color:var(--ink2);
   border:1.5px solid var(--chalk2);
@@ -658,7 +664,7 @@ body::before{
   html,body{background:white!important;background-image:none!important;
     width:297mm;height:210mm;overflow:hidden!important;margin:0!important;padding:0!important;}
   .layout{display:flex!important;width:285mm!important;height:198mm!important;overflow:hidden!important;}
-  .main{flex:1!important;padding:10mm 5mm 5mm!important;display:flex!important;flex-direction:column!important;height:198mm!important;overflow:hidden!important;}
+  .main{flex:1!important;padding:8mm 8mm 5mm 8mm!important;display:flex!important;flex-direction:column!important;height:198mm!important;overflow:hidden!important;}
   .cw{display:flex!important;flex-direction:row!important;gap:3mm!important;align-items:stretch!important;flex:1!important;min-height:0!important;page-break-inside:avoid;break-inside:avoid;}
   .cls{flex:1!important;display:flex!important;flex-direction:column!important;min-height:0!important;}
   *{page-break-inside:avoid;break-inside:avoid}
@@ -895,6 +901,8 @@ body::before{
 <div class="hdr no-print">
   <span class="hdr-title">🏫 자리 배치표</span>
   <div class="hdr-btns">
+    <button class="btn btn-undo" id="undoBtn" onclick="doUndo()" disabled title="직전 작업 되돌리기">↩️ 실행취소</button>
+    <div class="hdr-sep"></div>
     <button class="btn btn-rand" onclick="randomize()">🔀 전체 랜덤</button>
     <button class="btn btn-fix"  onclick="randomizeExcludeFixed()">📌 고정 제외 랜덤</button>
     <div class="hdr-sep"></div>
@@ -904,7 +912,7 @@ body::before{
     <button class="btn btn-edit" onclick="openStudentModal()">👥 학생 편집</button>
     <div class="hdr-sep"></div>
     <button class="btn btn-exp"  onclick="exportData()">📤 내보내기</button>
-    <button class="btn btn-imp"  onclick="document.getElementById('importFile').click()">📥 불러오기</button>
+    <button class="btn btn-imp"  onclick="openImportDialog()" title="저장한 자리배치_*.json 파일을 불러옵니다">📥 불러오기</button>
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <div class="hdr-sep"></div>
     <button class="btn btn-print" onclick="openPrintModal()">🖨️ 인쇄</button>
@@ -1208,6 +1216,35 @@ function initSeats(){
 function autoSave(){
   try{localStorage.setItem('seatApp7',JSON.stringify({COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher}));}catch(e){}
 }
+
+/* ── 실행취소 (Undo) ── */
+let undoStack=[];
+function pushUndo(){
+  const snap=JSON.stringify({COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher});
+  undoStack.push(snap);
+  if(undoStack.length>50)undoStack.shift();
+  const b=document.getElementById('undoBtn');if(b)b.disabled=false;
+}
+function doUndo(){
+  if(undoStack.length===0){toast('되돌릴 작업이 없어요');return;}
+  const snap=undoStack.pop();
+  const d=JSON.parse(snap);
+  COLS=d.COLS;ROWS=d.ROWS;bonus=d.bonus;
+  students=d.students;seats=d.seats;
+  fixed=new Set(d.fixed||[]);
+  pairMode=!!d.pairMode;printTheme=d.printTheme||0;
+  classGrade=d.classGrade||'';classTeacher=d.classTeacher||'';
+  const cc=document.getElementById('colCount');if(cc)cc.value=COLS;
+  const rc=document.getElementById('rowCount');if(rc)rc.value=ROWS;
+  const cg=document.getElementById('classGradeInput');if(cg)cg.value=classGrade;
+  const ct=document.getElementById('classTeacherInput');if(ct)ct.value=classTeacher;
+  syncClassInfo();
+  document.body.className=document.body.className.replace(/\bpt-\d+\b/g,'').trim()+` pt-${printTheme}`;
+  sel=null;
+  render();autoSave();
+  const b=document.getElementById('undoBtn');if(b&&undoStack.length===0)b.disabled=true;
+  toast('↩️ 되돌렸어요');
+}
 function loadLocal(){
   try{
     const r=localStorage.getItem('seatApp7');
@@ -1233,6 +1270,10 @@ function loadLocal(){
 }
 
 /* ── 내보내기/불러오기 ── */
+function openImportDialog(){
+  toast('📥 저장한 .json 파일을 선택하세요 (예: 자리배치_YYYYMMDD.json)');
+  setTimeout(()=>document.getElementById('importFile').click(),200);
+}
 function exportData(){
   const data={version:3,COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
@@ -1389,38 +1430,9 @@ function makePhSlot(targetIdx){
   el.className='seat ph-slot';
   el.dataset.phIdx=targetIdx;
   el.innerHTML=`<div class="sname">자리 추가</div>`;
-  el.addEventListener('dragover',e=>{
-    e.preventDefault();
-    e.dataTransfer.dropEffect='move';
-    if(dragSrcIdx!==null)el.classList.add('drag-over');
-  });
-  el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
-  el.addEventListener('drop',e=>{
-    e.preventDefault();
-    e.stopPropagation();
-    el.classList.remove('drag-over');
-    let src=dragSrcIdx;
-    if(src===null&&e.dataTransfer){
-      const data=e.dataTransfer.getData('text/plain');
-      if(data!==''){const n=parseInt(data,10);if(!isNaN(n))src=n;}
-    }
-    if(src===null||src<0||src>=seats.length)return;
-    if(fixed.has(src)){
-      dragSrcIdx=null;
-      toast('📌 고정된 자리는 옮길 수 없어요');return;
-    }
-    // seats 배열을 targetIdx까지 확장 (중간 슬롯은 null로 채움)
-    while(seats.length<=targetIdx){
-      seats.push(null);
-      bonus++;
-    }
-    // 스왑
-    [seats[src],seats[targetIdx]]=[seats[targetIdx],seats[src]];
-    dragSrcIdx=null;
-    render();autoSave();
-    toast('↔️ 자리를 옮겼어요');
-  });
+  // manual drag drop은 makeSeatEl의 mouseup 핸들러에서 seatUnderPoint로 처리됨
   el.onclick=()=>{
+    pushUndo();
     // 클릭 시: 그 위치까지 빈 자리 확장
     while(seats.length<=targetIdx){
       seats.push(null);
@@ -1451,59 +1463,69 @@ function makeSeatEl(i){
   el.innerHTML=(s&&s.name)
     ?`<div class="sname">${s.name}</div><div class="sid">${s.id}번</div>`
     :`<div class="sname" style="opacity:.3;font-size:13px">빈 자리</div>`;
-  el.onclick=()=>clickSeat(i);
   el.oncontextmenu=e=>{e.preventDefault();toggleFixed(i);};
-
-  // ── drag & drop ──
-  el.setAttribute('draggable','true');
-  el.draggable=true;
-  el.addEventListener('dragstart',e=>{
-    // 클릭 swap 모드(sel)와 충돌 방지
-    if(sel!==null){const prev=sel;sel=null;hideStatus();updateSeatEl(prev);updatePinBtn();}
-    dragSrcIdx=i;
-    el.classList.add('dragging');
-    if(e.dataTransfer){
-      e.dataTransfer.effectAllowed='copyMove';
-      try{e.dataTransfer.setData('text/plain',String(i));}catch(_){}
-      try{e.dataTransfer.setData('application/x-seat-idx',String(i));}catch(_){}
+  // ── manual drag (mousedown/mousemove/mouseup) — HTML5 native drag가 일부 환경에서 동작 안 함 ──
+  el.addEventListener('mousedown',e=>{
+    if(e.button!==0)return;
+    const startX=e.clientX, startY=e.clientY;
+    let started=false, ghost=null;
+    function onMove(ev){
+      if(!started){
+        if(Math.abs(ev.clientX-startX)<5&&Math.abs(ev.clientY-startY)<5)return;
+        started=true;
+        if(sel!==null){const prev=sel;sel=null;hideStatus();updateSeatEl(prev);updatePinBtn();}
+        el.classList.add('dragging');
+        const rect=el.getBoundingClientRect();
+        ghost=el.cloneNode(true);
+        ghost.classList.remove('dragging','sel');
+        ghost.style.cssText=`position:fixed;left:0;top:0;pointer-events:none;opacity:.85;z-index:99999;width:${rect.width}px;height:${rect.height}px;transition:none;transform:translate(${ev.clientX-rect.width/2}px,${ev.clientY-rect.height/2}px) rotate(-2deg);box-shadow:0 12px 28px rgba(44,24,16,.35)`;
+        document.body.appendChild(ghost);
+      }
+      if(ghost){
+        const r=el.getBoundingClientRect();
+        ghost.style.transform=`translate(${ev.clientX-r.width/2}px,${ev.clientY-r.height/2}px) rotate(-2deg)`;
+      }
+      document.querySelectorAll('.seat.drag-over').forEach(s=>s.classList.remove('drag-over'));
+      const tgt=seatUnderPoint(ev.clientX,ev.clientY);
+      if(tgt&&tgt!==el)tgt.classList.add('drag-over');
     }
-    console.log('[seat-chart] dragstart from idx',i);
-  });
-  el.addEventListener('dragend',()=>{
-    dragSrcIdx=null;
-    document.querySelectorAll('.seat.dragging').forEach(s=>s.classList.remove('dragging'));
-    document.querySelectorAll('.seat.drag-over').forEach(s=>s.classList.remove('drag-over'));
-  });
-  el.addEventListener('dragover',e=>{
-    e.preventDefault();
-    e.dataTransfer.dropEffect='move';
-    if(dragSrcIdx!==null&&dragSrcIdx!==i)el.classList.add('drag-over');
-  });
-  el.addEventListener('dragleave',()=>el.classList.remove('drag-over'));
-  el.addEventListener('drop',e=>{
-    e.preventDefault();
-    el.classList.remove('drag-over');
-    // dragend가 drop보다 먼저 fire되는 환경 대비: dataTransfer에서 src 복구
-    let src=dragSrcIdx;
-    if(src===null&&e.dataTransfer){
-      let data=e.dataTransfer.getData('application/x-seat-idx');
-      if(!data)data=e.dataTransfer.getData('text/plain');
-      if(data!==''){const n=parseInt(data,10);if(!isNaN(n))src=n;}
+    function onUp(ev){
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+      if(!started){clickSeat(i);return;}
+      if(ghost){ghost.remove();ghost=null;}
+      el.classList.remove('dragging');
+      document.querySelectorAll('.seat.drag-over').forEach(s=>s.classList.remove('drag-over'));
+      const tgt=seatUnderPoint(ev.clientX,ev.clientY);
+      if(!tgt||tgt===el)return;
+      const tIdx=tgt.dataset.idx?parseInt(tgt.dataset.idx,10):NaN;
+      const tPhIdx=tgt.dataset.phIdx?parseInt(tgt.dataset.phIdx,10):NaN;
+      if(!isNaN(tIdx)){
+        if(fixed.has(i)||fixed.has(tIdx)){toast('📌 고정된 자리는 교체할 수 없어요');return;}
+        pushUndo();
+        [seats[i],seats[tIdx]]=[seats[tIdx],seats[i]];
+        updateSeatEl(i);updateSeatEl(tIdx);
+        autoSave();toast('↔️ 자리를 교체했어요');
+      }else if(!isNaN(tPhIdx)){
+        if(fixed.has(i)){toast('📌 고정된 자리는 옮길 수 없어요');return;}
+        pushUndo();
+        while(seats.length<=tPhIdx){seats.push(null);bonus++;}
+        [seats[i],seats[tPhIdx]]=[seats[tPhIdx],seats[i]];
+        render();autoSave();toast('↔️ 자리를 옮겼어요');
+      }
     }
-    console.log('[seat-chart] drop to idx',i,'src=',src,'dragSrcIdx was',dragSrcIdx);
-    if(src===null||src===i||src<0||src>=seats.length)return;
-    if(fixed.has(src)||fixed.has(i)){
-      dragSrcIdx=null;
-      toast('📌 고정된 자리는 교체할 수 없어요');return;
-    }
-    [seats[src],seats[i]]=[seats[i],seats[src]];
-    dragSrcIdx=null;
-    updateSeatEl(src);updateSeatEl(i);
-    autoSave();
-    toast('↔️ 자리를 교체했어요');
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
   });
 
   return el;
+}
+
+// 마우스 위치에 있는 .seat element 찾기 (자식 hit-test 무관, 부모 .seat으로 climb)
+function seatUnderPoint(x,y){
+  let n=document.elementFromPoint(x,y);
+  while(n&&!(n.classList&&n.classList.contains('seat'))){n=n.parentElement;}
+  return n;
 }
 
 function updateSeatEl(i){
@@ -1566,6 +1588,7 @@ function clickSeat(i){
       toast('📌 고정된 자리는 교체할 수 없어요');
       clearSel();return;
     }
+    pushUndo();
     [seats[prev],seats[i]]=[seats[i],seats[prev]];
     sel=null;hideStatus();
     updateSeatEl(prev);updateSeatEl(i);
@@ -1574,6 +1597,7 @@ function clickSeat(i){
 }
 
 function toggleFixed(i){
+  pushUndo();
   if(fixed.has(i))fixed.delete(i);else fixed.add(i);
   updateSeatEl(i);renderSidebar();autoSave();updatePinBtn();
 }
@@ -1606,7 +1630,7 @@ function clearSel(){
   if(prev!==null)updateSeatEl(prev);
   updatePinBtn();
 }
-function clearFixed(){fixed.clear();renderGrid();renderSidebar();autoSave();toast('🔓 모든 고정 해제 완료');}
+function clearFixed(){pushUndo();fixed.clear();renderGrid();renderSidebar();autoSave();toast('🔓 모든 고정 해제 완료');}
 
 /* ── PAIR MODE ── */
 function togglePairMode(){
@@ -1629,11 +1653,13 @@ function applyPairVisual(){
 /* ── 랜덤 ── */
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function randomize(){
+  pushUndo();
   const f=seats.filter(s=>s!==null);shuffle(f);let fi=0;
   seats=seats.map(s=>s!==null?f[fi++]:null);
   animAll();render();autoSave();
 }
 function randomizeExcludeFixed(){
+  pushUndo();
   const mv=seats.map((_,i)=>i).filter(i=>!fixed.has(i));
   const v=mv.map(i=>seats[i]).filter(x=>x!==null);
   shuffle(v);let vi=0;
@@ -1656,6 +1682,7 @@ function rebuildGrid(){
   bonus=0;fixed.clear();sel=null;initSeats();render();autoSave();
 }
 function addOneSeat(){
+  pushUndo();
   bonus++;
   seats.push(null);
   const filled=fillEmptySeats();
@@ -1681,6 +1708,7 @@ function removeLastSeat(){
   if(bonus<=0){toast('추가한 자리가 없어요');return;}
   const lastIdx=seats.length-1;
   if(seats[lastIdx]!==null){toast('⚠️ 마지막 자리에 학생이 있어요');return;}
+  pushUndo();
   bonus--;
   seats.pop();
   fixed.delete(lastIdx);
@@ -1830,6 +1858,7 @@ function applyStudentsFromActiveTab(){
   }
   if(!newStudents||newStudents.length===0){toast('⚠️ 학생이 없어요');return;}
 
+  pushUndo();
   students=newStudents;
   // 학생이 좌석보다 많으면 bonus 좌석으로 자동 확장 (ROWS는 그대로)
   const need=students.filter(s=>s.name).length;
@@ -1903,11 +1932,10 @@ window.addEventListener('beforeprint',()=>{
 
   const mmToPx=3.7795;
   // .main 좌우 padding 10mm (5+5), 우측 명단 52mm, gap 6mm
-  const gridW=(285-52-3-10)*mmToPx;
-  // .cls 가용 = layout(198) - main padding(15) - chalkboard+margin(15) - cip(학반 입력 시 20, 미입력 시 0)
-  // .cw align-items:stretch이므로 cls 가용공간을 카드로 다 채워 빈공간 최소화
+  const gridW=(285-52-3-16)*mmToPx;
+  // .cls 가용 = layout(198) - main padding(13) - chalkboard+margin(15) - cip(학반 입력 시 20, 미입력 시 0)
   const hasBanner=!!(classGrade||classTeacher);
-  const nonGridMm=hasBanner?50:30;
+  const nonGridMm=hasBanner?48:28;
   const gridH=(198-nonGridMm)*mmToPx;
   const gap=4*mmToPx;
   // bonus 자리 포함하여 실제 표시 행 수 사용
@@ -1925,16 +1953,18 @@ window.addEventListener('beforeprint',()=>{
   // 학생 명단 인쇄 — 가용 세로공간을 (행수+header) 균등 분할 → padV 동적 계산
   const stCount=students.filter(s=>s.name).length;
   let nameFont=12, headFont=11, padH=7;
-  if(stCount>32){nameFont=10;padH=6;}
-  if(stCount>40){nameFont=9;padH=5;headFont=10;}
-  if(stCount>48){nameFont=8;padH=4;headFont=9;}
-  // nlp는 cw stretch로 main 가용공간(198-15) 전체 차지. nlt-head 8mm 제외.
-  const nlpAvailMm=198-15;
-  const tableAvailMm=nlpAvailMm-8;
+  if(stCount>24){nameFont=11;padH=6;}
+  if(stCount>28){nameFont=10;padH=6;}
+  if(stCount>34){nameFont=9;padH=5;headFont=10;}
+  if(stCount>42){nameFont=8;padH=4;headFont=9;}
+  // nlp는 cw stretch로 main 가용공간(198-13) 전체 차지. nlt-head ~10mm 제외(안전).
+  const nlpAvailMm=198-13;
+  const tableAvailMm=nlpAvailMm-10;
   const perRowMm=tableAvailMm/(stCount+1);
   const perRowPx=perRowMm*mmToPx;
-  const lineH=nameFont*1.25;
-  const padV=Math.max(1,Math.floor((perRowPx-lineH-1)/2));
+  // 안전한 estimate: lineH×1.4 + border 2 (table border + th/td bottom border)
+  const lineH=nameFont*1.4;
+  const padV=Math.max(0,Math.floor((perRowPx-lineH-2)/2));
   document.documentElement.style.setProperty('--print-list-font',nameFont+'px');
   document.documentElement.style.setProperty('--print-list-head-font',headFont+'px');
   document.documentElement.style.setProperty('--print-list-pad-v',padV+'px');
@@ -1976,6 +2006,7 @@ document.addEventListener('keydown',e=>{
     expanded=true;
   }
   if(fixed.has(sel)||fixed.has(next)){toast('📌 고정된 자리는 교체할 수 없어요');return;}
+  pushUndo();
   [seats[sel],seats[next]]=[seats[next],seats[sel]];
   const prev=sel;sel=next;
   if(expanded){render();}
