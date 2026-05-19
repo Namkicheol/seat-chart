@@ -1396,8 +1396,12 @@ function makePhSlot(targetIdx){
     e.preventDefault();
     e.stopPropagation();
     el.classList.remove('drag-over');
-    if(dragSrcIdx===null)return;
-    const src=dragSrcIdx;
+    let src=dragSrcIdx;
+    if(src===null&&e.dataTransfer){
+      const data=e.dataTransfer.getData('text/plain');
+      if(data!==''){const n=parseInt(data,10);if(!isNaN(n))src=n;}
+    }
+    if(src===null||src<0||src>=seats.length)return;
     // seats 배열을 targetIdx까지 확장 (중간 슬롯은 null로 채움)
     while(seats.length<=targetIdx){
       seats.push(null);
@@ -1468,8 +1472,13 @@ function makeSeatEl(i){
   el.addEventListener('drop',e=>{
     e.preventDefault();
     el.classList.remove('drag-over');
-    if(dragSrcIdx===null||dragSrcIdx===i)return;
-    const src=dragSrcIdx;
+    // dragend가 drop보다 먼저 fire되는 환경 대비: dataTransfer에서 src 복구
+    let src=dragSrcIdx;
+    if(src===null&&e.dataTransfer){
+      const data=e.dataTransfer.getData('text/plain');
+      if(data!==''){const n=parseInt(data,10);if(!isNaN(n))src=n;}
+    }
+    if(src===null||src===i||src<0||src>=seats.length)return;
     [seats[src],seats[i]]=[seats[i],seats[src]];
     dragSrcIdx=null;
     updateSeatEl(src);updateSeatEl(i);
