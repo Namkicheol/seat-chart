@@ -201,15 +201,10 @@ body::before{
 /* ── SEAT GRID ── */
 .seat-grid{display:grid;gap:7px;justify-content:start;align-content:start}
 
-/* ── PAIR DESK WRAPPER ── */
+/* ── PAIR DESK WRAPPER — 짝 묶음은 굵은 테두리만으로 표시 (색 X) ── */
 .seat-row{display:flex;gap:16px;flex-shrink:0;align-items:flex-start}
-.seat-pair-wrap{display:flex;gap:3px;padding:3px;border-radius:12px;
-  border:2px solid transparent;position:relative;}
-.seat-pair-wrap.pg0{border-color:rgba(249,168,37,.55);background:rgba(255,249,196,.25)}
-.seat-pair-wrap.pg1{border-color:rgba(21,101,192,.4);background:rgba(187,222,251,.15)}
-.seat-pair-wrap.pg2{border-color:rgba(229,57,53,.4);background:rgba(255,205,210,.12)}
-.seat-pair-wrap.pg3{border-color:rgba(46,125,50,.4);background:rgba(200,230,201,.12)}
-.seat-pair-wrap.pg4{border-color:rgba(92,61,30,.35);background:rgba(215,204,200,.1)}
+.seat-pair-wrap{display:flex;gap:4px;padding:5px;border-radius:14px;
+  border:3px solid rgba(92,61,30,.5);background:transparent;position:relative;}
 
 .seat{
   width:var(--sw,124px);height:var(--sh-seat,100px);
@@ -313,27 +308,7 @@ body::before{
 @media print{
   .seat.ph-slot{display:none!important}
 }
-/* ── PAIR MODE SEAT COLORS (via wrapper group) ── */
-.seat-pair-wrap.pg0 .seat:not(.fx):not(.sel):not(.empty){
-  background:linear-gradient(160deg,#FFFDE7,#FFF9C4)!important;
-  border-color:rgba(249,168,37,.4)!important;
-}
-.seat-pair-wrap.pg1 .seat:not(.fx):not(.sel):not(.empty){
-  background:linear-gradient(160deg,#E3F2FD,#BBDEFB)!important;
-  border-color:rgba(21,101,192,.35)!important;
-}
-.seat-pair-wrap.pg2 .seat:not(.fx):not(.sel):not(.empty){
-  background:linear-gradient(160deg,#FFEBEE,#FFCDD2)!important;
-  border-color:rgba(229,57,53,.35)!important;
-}
-.seat-pair-wrap.pg3 .seat:not(.fx):not(.sel):not(.empty){
-  background:linear-gradient(160deg,#F1F8E9,#DCEDC8)!important;
-  border-color:rgba(46,125,50,.35)!important;
-}
-.seat-pair-wrap.pg4 .seat:not(.fx):not(.sel):not(.empty){
-  background:linear-gradient(160deg,#EFEBE9,#D7CCC8)!important;
-  border-color:rgba(92,61,30,.3)!important;
-}
+/* PAIR MODE는 wrapper 굵은 테두리만으로 짝 그룹 표시 — 좌석 색은 테마 그대로 유지 */
 
 .sname{
   font-family:var(--ui-font);font-size:var(--sname-size,30px);font-weight:700;
@@ -705,7 +680,7 @@ body::before{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .no-print,.sidebar{display:none!important}
   html,body{background:white!important;background-image:none!important;
-    width:297mm;height:210mm;overflow:hidden!important;margin:0!important;padding:0!important;}
+    width:285mm;height:198mm;overflow:hidden!important;margin:0!important;padding:0!important;}
   .layout{display:flex!important;width:285mm!important;height:198mm!important;overflow:hidden!important;}
   .main{flex:1!important;padding:8mm 8mm 5mm 8mm!important;display:flex!important;flex-direction:column!important;height:198mm!important;overflow:hidden!important;}
   .cw{display:flex!important;flex-direction:row!important;gap:3mm!important;align-items:stretch!important;flex:1!important;min-height:0!important;page-break-inside:avoid;break-inside:avoid;}
@@ -724,7 +699,8 @@ body::before{
   /* seat grid print */
   .seat-grid{gap:4px!important;align-content:start!important;flex:1!important;}
   .seat{width:var(--pw,110px)!important;height:var(--ph,62px)!important;border-radius:8px!important;transform:none!important;}
-  .seat::before{display:none!important}
+  /* 캐릭터 테마(pt-2) 외에는 ::before 숨김 */
+  body:not(.pt-2) .seat::before{display:none!important}
   .sname{font-size:var(--pname,15px)!important;font-weight:900!important;font-family:var(--ui-font)!important}
   .sid{font-size:var(--pid,9px)!important;margin-top:1px!important;font-family:var(--ui-font)!important}
   .nlt th,.nlt td{font-family:var(--ui-font)!important}
@@ -732,8 +708,8 @@ body::before{
 
   /* fixed seat pin icon */
   .seat.fx::after{content:'📌';font-size:9px!important;top:2px!important;right:4px!important}
-  /* pair wrapper - suppress screen colors in print */
-  .seat-pair-wrap{border:none!important;background:transparent!important;padding:0!important;gap:4px!important;}
+  /* pair wrapper print — 굵은 테두리는 살리고 배경/색만 제거 */
+  .seat-pair-wrap{border-width:2.5px!important;border-style:solid!important;background:transparent!important;padding:3px!important;gap:4px!important;}
   .seat-row{gap:10px!important}
 
   /* right name list print */
@@ -771,7 +747,7 @@ body::before{
     background:linear-gradient(180deg,rgba(253,250,244,.95),rgba(245,240,228,.95))!important;
     border:2px solid var(--wood)!important;
     border-radius:6px!important;
-    box-shadow:0 2px 0 rgba(92,61,30,.18),0 1px 0 rgba(255,255,255,.6) inset!important;
+    box-shadow:0 1px 0 rgba(255,255,255,.6) inset!important;
     flex-shrink:0!important;
     white-space:nowrap!important;
     line-height:1.15!important;
@@ -796,10 +772,8 @@ body::before{
 ══════════════════════════════════ */
 @media print{
   body.pt-0{background:#FFFEF5!important}
-  body.pt-0::before{content:'';position:fixed;top:2.5mm;bottom:2.5mm;left:2.5mm;right:2.5mm;
-    border:3px double #C8860A;pointer-events:none;border-radius:3px;z-index:9998}
-  body.pt-0::after{content:'';position:fixed;top:7mm;bottom:7mm;left:7mm;right:7mm;
-    border:1px solid rgba(200,134,10,.35);pointer-events:none;z-index:9998}
+  body.pt-0::before{content:none!important}
+  body.pt-0::after{content:none!important}
   body.pt-0 .print-frame span{border-color:#9E6800}
   body.pt-0 .seat{background:linear-gradient(160deg,#FFFDE7,#FFF9C4,#FFE57F)!important;
     border:2px solid #C8860A!important;box-shadow:0 2px 0 #9E6800!important}
@@ -828,10 +802,8 @@ body::before{
 ══════════════════════════════════ */
 @media print{
   body.pt-1{background:white!important}
-  body.pt-1::before{content:'';position:fixed;top:2.5mm;bottom:2.5mm;left:2.5mm;right:2.5mm;
-    border:1px solid #E5E7EB;pointer-events:none;border-radius:6px;z-index:9998}
-  body.pt-1::after{content:'';position:fixed;top:6.5mm;bottom:6.5mm;left:6.5mm;right:6.5mm;
-    border:1px solid #F3F4F6;pointer-events:none;border-radius:4px;z-index:9998}
+  body.pt-1::before{content:none!important}
+  body.pt-1::after{content:none!important}
   body.pt-1 .print-frame span{border-color:#9CA3AF}
   body.pt-1 .seat{background:white!important;
     border:1px solid #E5E7EB!important;box-shadow:0 1px 4px rgba(0,0,0,.05)!important;border-radius:6px!important}
@@ -860,21 +832,35 @@ body::before{
    PRINT THEME 2: 캐릭터 (Character)
 ══════════════════════════════════ */
 @media print{
-  body.pt-2{background:#FEFCE8!important}
-  body.pt-2::before{content:'';position:fixed;top:2.5mm;bottom:2.5mm;left:2.5mm;right:2.5mm;
-    border:3px dashed #86EFAC;pointer-events:none;border-radius:20px;z-index:9998}
-  body.pt-2::after{content:'';position:fixed;top:7mm;bottom:7mm;left:7mm;right:7mm;
-    border:2px dashed #BEF264;pointer-events:none;border-radius:16px;z-index:9998}
-  body.pt-2 .print-frame span{border-color:#16A34A;border-style:dashed!important}
-  body.pt-2 .seat{border-radius:18px!important;border-style:dashed!important;border-width:2.5px!important;box-shadow:3px 3px 0 rgba(0,0,0,.06)!important}
-  body.pt-2 .seat:nth-child(5n+1){background:#ECFCCB!important;border-color:#86EFAC!important}
-  body.pt-2 .seat:nth-child(5n+2){background:#E0F2FE!important;border-color:#7DD3FC!important}
-  body.pt-2 .seat:nth-child(5n+3){background:#FEF9C3!important;border-color:#FDE047!important}
-  body.pt-2 .seat:nth-child(5n+4){background:#FCE7F3!important;border-color:#F9A8D4!important}
-  body.pt-2 .seat:nth-child(5n){background:#CCFBF1!important;border-color:#5EEAD4!important}
+  body.pt-2{background:#FFFEF7!important}
+  /* 사방 점선 프레임 제거 — 깔끔한 한 줄만 */
+  body.pt-2::before{content:none!important}
+  body.pt-2::after{content:none!important}
+  body.pt-2 .print-frame{display:none!important}
+  body.pt-2 .seat{border-radius:14px!important;border-style:dashed!important;border-width:2.5px!important;box-shadow:2px 2px 0 rgba(0,0,0,.07)!important;position:relative!important;overflow:visible!important}
+  /* 캐릭터 5종 — 토끼/거북이/곰/고양이/여우 */
+  body.pt-2 .seat.cg0:not(.empty){background:#FCE7F3!important;border-color:#F9A8D4!important}
+  body.pt-2 .seat.cg1:not(.empty){background:#D1FAE5!important;border-color:#6EE7B7!important}
+  body.pt-2 .seat.cg2:not(.empty){background:#FEF3C7!important;border-color:#FCD34D!important}
+  body.pt-2 .seat.cg3:not(.empty){background:#FFE4D6!important;border-color:#FDBA74!important}
+  body.pt-2 .seat.cg4:not(.empty){background:#E9D5FF!important;border-color:#C4B5FD!important}
+  /* 인쇄용 마스코트 — 크게, 약간 기울임 */
+  body.pt-2 .seat:not(.empty)::before{
+    content:''!important;display:block!important;position:absolute!important;
+    top:2px!important;right:3px!important;width:36px!important;height:36px!important;
+    background-repeat:no-repeat!important;background-position:center!important;background-size:contain!important;
+    pointer-events:none!important;
+    filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.18))!important;
+    transform:rotate(-4deg)!important;
+  }
   body.pt-2 .seat.fx{border-style:solid!important;border-width:2.5px!important}
-  body.pt-2 .sname{color:#1A3A2A!important}
-  body.pt-2 .sid{color:#166534!important;opacity:1!important}
+  body.pt-2 .sname{color:#3A2A2A!important}
+  body.pt-2 .sid{color:#6B4226!important;opacity:.75!important}
+  body.pt-2 .seat.cg0 .sname{color:#831843!important} body.pt-2 .seat.cg0 .sid{color:#BE185D!important}
+  body.pt-2 .seat.cg1 .sname{color:#064E3B!important} body.pt-2 .seat.cg1 .sid{color:#047857!important}
+  body.pt-2 .seat.cg2 .sname{color:#78350F!important} body.pt-2 .seat.cg2 .sid{color:#B45309!important}
+  body.pt-2 .seat.cg3 .sname{color:#7C2D12!important} body.pt-2 .seat.cg3 .sid{color:#C2410C!important}
+  body.pt-2 .seat.cg4 .sname{color:#4C1D95!important} body.pt-2 .seat.cg4 .sid{color:#7C3AED!important}
   body.pt-2 .chalkboard-outer{background:linear-gradient(135deg,#CA8A04,#FBBF24)!important;border-color:#A16207!important;border-radius:12px 12px 0 0!important}
   body.pt-2 .chalkboard-inner{background:linear-gradient(135deg,#FEF08A,#FDE047)!important}
   body.pt-2 .cb-text{font-family:'Gaegu',cursive!important;color:#713F12!important;letter-spacing:7px!important;text-shadow:1px 1px 0 rgba(255,255,255,.4)!important}
@@ -897,10 +883,8 @@ body::before{
 ══════════════════════════════════ */
 @media print{
   body.pt-3{background:#F4F3EE!important}
-  body.pt-3::before{content:'';position:fixed;top:2.5mm;bottom:2.5mm;left:2.5mm;right:2.5mm;
-    border:1.5px solid #D97757;pointer-events:none;border-radius:10px;z-index:9998}
-  body.pt-3::after{content:'';position:fixed;top:6.5mm;bottom:6.5mm;left:6.5mm;right:6.5mm;
-    border:1px solid rgba(217,119,87,.4);pointer-events:none;border-radius:8px;z-index:9998}
+  body.pt-3::before{content:none!important}
+  body.pt-3::after{content:none!important}
   body.pt-3 .print-frame span{border-color:#C2643E}
   body.pt-3 .seat{background:#F4F3EE!important;
     border:1.5px solid #D97757!important;box-shadow:0 1px 0 rgba(217,119,87,.2)!important;border-radius:10px!important}
@@ -930,10 +914,8 @@ body::before{
 ══════════════════════════════════ */
 @media print{
   body.pt-4{background:#FDF6E3!important}
-  body.pt-4::before{content:'';position:fixed;top:2mm;bottom:2mm;left:2mm;right:2mm;
-    border:4px double #5D4037;pointer-events:none;z-index:9998}
-  body.pt-4::after{content:'';position:fixed;top:7.5mm;bottom:7.5mm;left:7.5mm;right:7.5mm;
-    border:1px solid #A1887F;pointer-events:none;z-index:9998}
+  body.pt-4::before{content:none!important}
+  body.pt-4::after{content:none!important}
   body.pt-4 .print-frame span{border-color:#3E2723;border-width:5px!important}
   body.pt-4 .seat{background:linear-gradient(160deg,#FDF6E3,#F5EACD,#EDD9A3)!important;
     border:2px solid #795548!important;box-shadow:0 2px 0 #5D4037!important}
@@ -1008,7 +990,7 @@ body.pt-1 .cb-text{
 }
 body.pt-1 .cb-sub{color:rgba(249,250,251,.28)!important}
 body.pt-1 .chalkboard-ledge{background:#374151!important}
-body.pt-1 .seat-pair-wrap{border-color:rgba(107,114,128,.18)!important;background:rgba(249,250,251,.6)!important}
+body.pt-1 .seat-pair-wrap{border-color:rgba(75,85,99,.55)!important;background:transparent!important}
 body.pt-1 .nlt-card{border-color:#E5E7EB!important;box-shadow:0 1px 4px rgba(0,0,0,.05)!important}
 body.pt-1 .nlt-head{background:#1F2937!important}
 body.pt-1 .nlt-head-txt{color:#F9FAFB!important}
@@ -1042,27 +1024,46 @@ body.pt-2 .seat:not(.ph-slot):not(.empty):hover{
   box-shadow:6px 6px 0 rgba(0,0,0,.09)!important;
 }
 body.pt-2 .seat.sel{border-style:solid!important;border-width:3px!important;box-shadow:4px 4px 0 rgba(0,0,0,.09)!important}
-body.pt-2 .seat:nth-child(5n+1):not(.ph-slot):not(.empty){background:#ECFCCB!important;border-color:#86EFAC!important}
-body.pt-2 .seat:nth-child(5n+2):not(.ph-slot):not(.empty){background:#E0F2FE!important;border-color:#7DD3FC!important}
-body.pt-2 .seat:nth-child(5n+3):not(.ph-slot):not(.empty){background:#FEF9C3!important;border-color:#FDE047!important}
-body.pt-2 .seat:nth-child(5n+4):not(.ph-slot):not(.empty){background:#FCE7F3!important;border-color:#F9A8D4!important}
-body.pt-2 .seat:nth-child(5n):not(.ph-slot):not(.empty){background:#CCFBF1!important;border-color:#5EEAD4!important}
-body.pt-2 .seat:nth-child(5n+1).sel{background:#D1FAE5!important}
-body.pt-2 .seat:nth-child(5n+2).sel{background:#BAE6FD!important}
-body.pt-2 .seat:nth-child(5n+3).sel{background:#FDE68A!important}
-body.pt-2 .seat:nth-child(5n+4).sel{background:#FBCFE8!important}
-body.pt-2 .seat:nth-child(5n).sel{background:#99F6E4!important}
+/* 캐릭터별 색감 — 부드러운 파스텔 동물 친구들 */
+body.pt-2 .seat.cg0:not(.ph-slot):not(.empty){background:#FCE7F3!important;border-color:#F9A8D4!important}  /* 🐰 토끼 - 분홍 */
+body.pt-2 .seat.cg1:not(.ph-slot):not(.empty){background:#D1FAE5!important;border-color:#6EE7B7!important}  /* 🐢 거북이 - 민트 */
+body.pt-2 .seat.cg2:not(.ph-slot):not(.empty){background:#FEF3C7!important;border-color:#FCD34D!important}  /* 🐻 곰 - 베이지 */
+body.pt-2 .seat.cg3:not(.ph-slot):not(.empty){background:#FFE4D6!important;border-color:#FDBA74!important}  /* 🐱 고양이 - 살구 */
+body.pt-2 .seat.cg4:not(.ph-slot):not(.empty){background:#E9D5FF!important;border-color:#C4B5FD!important}  /* 🦊 여우 - 라벤더 */
+body.pt-2 .seat.cg0.sel{background:#FBCFE8!important;border-color:#EC4899!important}
+body.pt-2 .seat.cg1.sel{background:#A7F3D0!important;border-color:#10B981!important}
+body.pt-2 .seat.cg2.sel{background:#FDE68A!important;border-color:#F59E0B!important}
+body.pt-2 .seat.cg3.sel{background:#FED7AA!important;border-color:#F97316!important}
+body.pt-2 .seat.cg4.sel{background:#DDD6FE!important;border-color:#8B5CF6!important}
+/* 커스텀 마스코트 5종 — 같은 몸체 + 다른 머리 액세서리 (토끼귀/곰귀/병아리깃/고양이귀/별) */
 body.pt-2 .seat:not(.ph-slot):not(.empty)::before{
-  position:absolute;top:3px;right:5px;font-size:13px;
+  content:'';display:block;position:absolute;top:4px;right:4px;
+  width:46px;height:46px;
+  background-repeat:no-repeat;background-position:center;background-size:contain;
   pointer-events:none;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.18));
+  transform:rotate(-4deg);
+  transition:transform .25s;
 }
-body.pt-2 .seat:nth-child(5n+1):not(.ph-slot):not(.empty)::before{content:'🐰'}
-body.pt-2 .seat:nth-child(5n+2):not(.ph-slot):not(.empty)::before{content:'🌊'}
-body.pt-2 .seat:nth-child(5n+3):not(.ph-slot):not(.empty)::before{content:'🌻'}
-body.pt-2 .seat:nth-child(5n+4):not(.ph-slot):not(.empty)::before{content:'🌸'}
-body.pt-2 .seat:nth-child(5n):not(.ph-slot):not(.empty)::before{content:'🐱'}
-body.pt-2 .sname{color:#1A3A2A!important}
-body.pt-2 .sid{color:#166534!important;opacity:1!important}
+body.pt-2 .seat:not(.ph-slot):not(.empty):hover::before{transform:rotate(4deg) scale(1.1)}
+body.pt-2 .seat.cg0:not(.ph-slot):not(.empty)::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><ellipse cx='8' cy='5' rx='1.5' ry='4' fill='%23F9A8D4'/><ellipse cx='16' cy='5' rx='1.5' ry='4' fill='%23F9A8D4'/><ellipse cx='8' cy='5.5' rx='0.6' ry='2.5' fill='%23FBCFE8'/><ellipse cx='16' cy='5.5' rx='0.6' ry='2.5' fill='%23FBCFE8'/><circle cx='12' cy='14' r='7' fill='%23FBCFE8' stroke='%23DB2777' stroke-width='0.7'/><circle cx='9.5' cy='13' r='1' fill='%23831843'/><circle cx='14.5' cy='13' r='1' fill='%23831843'/><circle cx='9.7' cy='12.7' r='0.3' fill='white'/><circle cx='14.7' cy='12.7' r='0.3' fill='white'/><ellipse cx='8' cy='15.5' rx='1.1' ry='0.7' fill='%23F472B6' opacity='0.55'/><ellipse cx='16' cy='15.5' rx='1.1' ry='0.7' fill='%23F472B6' opacity='0.55'/><path d='M11 16 Q12 17 13 16' stroke='%23831843' stroke-width='0.7' fill='none' stroke-linecap='round'/></svg>")}
+body.pt-2 .seat.cg1:not(.ph-slot):not(.empty)::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><circle cx='7' cy='8' r='2.5' fill='%2334D399'/><circle cx='17' cy='8' r='2.5' fill='%2334D399'/><circle cx='7' cy='8' r='1.2' fill='%23A7F3D0'/><circle cx='17' cy='8' r='1.2' fill='%23A7F3D0'/><circle cx='12' cy='14' r='7' fill='%23A7F3D0' stroke='%2310B981' stroke-width='0.7'/><ellipse cx='12' cy='15' rx='2.2' ry='1.7' fill='%23ECFCCB'/><circle cx='9.5' cy='13' r='1' fill='%23064E3B'/><circle cx='14.5' cy='13' r='1' fill='%23064E3B'/><circle cx='9.7' cy='12.7' r='0.3' fill='white'/><circle cx='14.7' cy='12.7' r='0.3' fill='white'/><ellipse cx='12' cy='14.7' rx='0.5' ry='0.4' fill='%23064E3B'/><ellipse cx='7.5' cy='15.5' rx='1.1' ry='0.7' fill='%2334D399' opacity='0.55'/><ellipse cx='16.5' cy='15.5' rx='1.1' ry='0.7' fill='%2334D399' opacity='0.55'/><path d='M11 16 Q12 17 13 16' stroke='%23064E3B' stroke-width='0.7' fill='none' stroke-linecap='round'/></svg>")}
+body.pt-2 .seat.cg2:not(.ph-slot):not(.empty)::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M10 4 Q11 1.5 12 4 Q13 1.5 14 4 L13.5 6 L10.5 6 Z' fill='%23F59E0B'/><circle cx='12' cy='14' r='7.5' fill='%23FDE68A' stroke='%23D97706' stroke-width='0.7'/><circle cx='9.5' cy='13' r='1.1' fill='%23713F12'/><circle cx='14.5' cy='13' r='1.1' fill='%23713F12'/><circle cx='9.7' cy='12.7' r='0.35' fill='white'/><circle cx='14.7' cy='12.7' r='0.35' fill='white'/><path d='M11 15.5 L12 17 L13 15.5 Z' fill='%23F97316'/><ellipse cx='7.5' cy='15.8' rx='1.1' ry='0.7' fill='%23FB923C' opacity='0.55'/><ellipse cx='16.5' cy='15.8' rx='1.1' ry='0.7' fill='%23FB923C' opacity='0.55'/></svg>")}
+body.pt-2 .seat.cg3:not(.ph-slot):not(.empty)::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M5 9 L7 4 L9.5 8.5 Z' fill='%23F97316'/><path d='M14.5 8.5 L17 4 L19 9 Z' fill='%23F97316'/><path d='M6.2 8.3 L7 5.8 L8.3 8.3 Z' fill='%23FED7AA'/><path d='M15.7 8.3 L17 5.8 L17.8 8.3 Z' fill='%23FED7AA'/><circle cx='12' cy='14' r='7' fill='%23FED7AA' stroke='%23EA580C' stroke-width='0.7'/><path d='M8.5 12.5 Q9.5 11.7 10.5 12.5' stroke='%237C2D12' stroke-width='0.9' fill='none' stroke-linecap='round'/><path d='M13.5 12.5 Q14.5 11.7 15.5 12.5' stroke='%237C2D12' stroke-width='0.9' fill='none' stroke-linecap='round'/><path d='M11.3 14.3 L12 15.1 L12.7 14.3 Z' fill='%237C2D12'/><path d='M12 15.1 Q11 16 10.3 15.6 M12 15.1 Q13 16 13.7 15.6' stroke='%237C2D12' stroke-width='0.5' fill='none' stroke-linecap='round'/><line x1='5.5' y1='14' x2='8.5' y2='14.5' stroke='%237C2D12' stroke-width='0.4'/><line x1='15.5' y1='14.5' x2='18.5' y2='14' stroke='%237C2D12' stroke-width='0.4'/></svg>")}
+body.pt-2 .seat.cg4:not(.ph-slot):not(.empty)::before{background-image:url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M12 1.5 L13.2 4.4 L16.3 4.4 L13.8 6.3 L14.7 9.3 L12 7.5 L9.3 9.3 L10.2 6.3 L7.7 4.4 L10.8 4.4 Z' fill='%23C4B5FD' stroke='%238B5CF6' stroke-width='0.5'/><circle cx='12' cy='15' r='6.8' fill='%23DDD6FE' stroke='%237C3AED' stroke-width='0.7'/><circle cx='9.5' cy='14' r='1' fill='%234C1D95'/><circle cx='14.5' cy='14' r='1' fill='%234C1D95'/><circle cx='9.7' cy='13.7' r='0.3' fill='white'/><circle cx='14.7' cy='13.7' r='0.3' fill='white'/><ellipse cx='8.5' cy='16.5' rx='1.1' ry='0.7' fill='%23A78BFA' opacity='0.55'/><ellipse cx='15.5' cy='16.5' rx='1.1' ry='0.7' fill='%23A78BFA' opacity='0.55'/><path d='M11 17 Q12 18 13 17' stroke='%234C1D95' stroke-width='0.7' fill='none' stroke-linecap='round'/></svg>")}
+body.pt-2 .sname{color:#3A2A2A!important}
+body.pt-2 .sid{color:#6B4226!important;opacity:.7!important}
+/* 캐릭터별 이름 색상 톤 통일 */
+body.pt-2 .seat.cg0 .sname{color:#831843!important}
+body.pt-2 .seat.cg0 .sid{color:#BE185D!important}
+body.pt-2 .seat.cg1 .sname{color:#064E3B!important}
+body.pt-2 .seat.cg1 .sid{color:#047857!important}
+body.pt-2 .seat.cg2 .sname{color:#78350F!important}
+body.pt-2 .seat.cg2 .sid{color:#B45309!important}
+body.pt-2 .seat.cg3 .sname{color:#7C2D12!important}
+body.pt-2 .seat.cg3 .sid{color:#C2410C!important}
+body.pt-2 .seat.cg4 .sname{color:#4C1D95!important}
+body.pt-2 .seat.cg4 .sid{color:#7C3AED!important}
 body.pt-2 .chalkboard-outer{
   background:linear-gradient(135deg,#CA8A04,#FBBF24)!important;
   border-color:#A16207!important;
@@ -1085,7 +1086,7 @@ body.pt-2 .cb-text{
 }
 body.pt-2 .cb-sub{color:rgba(113,63,18,.4)!important}
 body.pt-2 .chalkboard-ledge{background:#A16207!important}
-body.pt-2 .seat-pair-wrap{border-color:rgba(134,239,172,.5)!important;background:rgba(254,252,232,.5)!important}
+body.pt-2 .seat-pair-wrap{border-color:rgba(22,101,52,.55)!important;background:transparent!important}
 body.pt-2 .nlt-card{border-color:#86EFAC!important;border-radius:16px!important;overflow:hidden}
 body.pt-2 .nlt-head{background:linear-gradient(135deg,#86EFAC,#34D399)!important}
 body.pt-2 .nlt-head-txt{color:#064E3B!important}
@@ -1136,7 +1137,7 @@ body.pt-3 .cb-text{
 }
 body.pt-3 .cb-sub{color:rgba(244,243,238,.3)!important}
 body.pt-3 .chalkboard-ledge{background:linear-gradient(90deg,#1A0F0A,#3A2A1F,#1A0F0A)!important}
-body.pt-3 .seat-pair-wrap{border-color:rgba(217,119,87,.3)!important;background:rgba(244,243,238,.5)!important}
+body.pt-3 .seat-pair-wrap{border-color:rgba(194,100,62,.7)!important;background:transparent!important}
 body.pt-3 .nlt-card{border-color:#D97757!important}
 body.pt-3 .nlt-head{background:linear-gradient(135deg,#3A2A1F,#D97757)!important}
 body.pt-3 .nlt-head-txt{color:#F4F3EE!important}
@@ -1680,9 +1681,8 @@ function renderGrid(){
       const rowDiv=document.createElement('div');
       rowDiv.className='seat-row';
       for(let c=0;c<COLS;c+=2){
-        const pairGrp=Math.floor(c/2)%5;
         const pairDiv=document.createElement('div');
-        pairDiv.className=`seat-pair-wrap pg${pairGrp}`;
+        pairDiv.className='seat-pair-wrap';
         const i1=r*COLS+c;
         if(i1<total)pairDiv.appendChild(makeSeatEl(i1));
         else if(hasPartialRow&&r===fullRows-1&&i1>=partialRowStart)pairDiv.appendChild(makePhSlot(i1));
@@ -1746,12 +1746,13 @@ function makePhSlot(targetIdx){
 function makeSeatEl(i){
   const si=seats[i];
   const col=i%COLS;
-  const pairGrp=Math.floor(col/2)%5;
+  const row=Math.floor(i/COLS);
+  const charGrp=(row+col)%5;
   const el=document.createElement('div');
-  el.className='seat';
+  el.className='seat cg'+charGrp;
   el.dataset.idx=i;
   el.dataset.col=col;
-  el.dataset.pairgrp=pairGrp;
+  el.dataset.chargrp=charGrp;
   if(pairMode)el.dataset.pairmode='1';
   if(fixed.has(i))el.classList.add('fx');
   else if(si===null)el.classList.add('empty');

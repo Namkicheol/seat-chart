@@ -1,3 +1,5 @@
 .DS_Store
 .lazyweb/
 .playwright-mcp/
+.claude/
+index_recovered.html
