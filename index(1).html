@@ -1498,10 +1498,13 @@ function initSeats(){
   const base=COLS*ROWS;
   seats=Array.from({length:t},()=>null);
   // 메인 그리드(ROWS×COLS)에는 처음 base명을 우열(右→左) 배치
+  // 학생수<좌석수일 때 빈 자리가 partial column으로 흩어지지 않고
+  // 한 '행'으로 묶이도록 사용 행수(neededRows)만큼만 사용.
   const inMain=Math.min(students.length,base);
+  const neededRows=Math.max(1,Math.min(ROWS,Math.ceil(inMain/COLS)));
   for(let si=0;si<inMain;si++){
-    const col=(COLS-1)-Math.floor(si/ROWS);
-    const row=(ROWS-1)-(si%ROWS);
+    const col=(COLS-1)-Math.floor(si/neededRows);
+    const row=(neededRows-1)-(si%neededRows);
     const idx=row*COLS+col;
     if(idx>=0&&idx<base)seats[idx]=si;
   }
