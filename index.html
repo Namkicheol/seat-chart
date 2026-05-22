@@ -66,6 +66,37 @@ body::before{
 .hdr-btns{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-left:auto;position:relative}
 .hdr-sep{width:1px;height:22px;background:rgba(255,249,196,.18);margin:0 2px;flex-shrink:0}
 
+/* ── FEEDBACK BUTTON (circular, top-right) ── */
+.btn-feedback{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,#D9B38C 0%,#B8865C 100%);
+  border:2px solid rgba(255,249,230,.45);
+  color:#fff;cursor:pointer;text-decoration:none;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;line-height:1;
+  margin-left:6px;flex-shrink:0;position:relative;
+  box-shadow:0 4px 12px rgba(92,61,30,.35),0 1px 0 rgba(255,255,255,.35) inset;
+  transition:transform .18s ease,box-shadow .18s ease;
+}
+.btn-feedback::after{
+  content:'문의 및 오류 피드백';
+  position:absolute;top:calc(100% + 8px);right:0;
+  background:rgba(28,16,10,.92);color:#FFF9C4;
+  padding:5px 9px;border-radius:6px;
+  font-family:'Noto Sans KR',sans-serif;font-size:11px;font-weight:600;
+  white-space:nowrap;letter-spacing:.3px;
+  opacity:0;pointer-events:none;transform:translateY(-3px);
+  transition:opacity .18s ease,transform .18s ease;
+  box-shadow:0 4px 10px rgba(0,0,0,.25);
+  z-index:100;
+}
+.btn-feedback:hover{
+  transform:translateY(-1px) scale(1.06);
+  box-shadow:0 6px 16px rgba(92,61,30,.45),0 1px 0 rgba(255,255,255,.35) inset;
+}
+.btn-feedback:hover::after{opacity:1;transform:translateY(0)}
+.btn-feedback:active{transform:translateY(0) scale(1.02)}
+
 /* ── LAYOUT ── */
 .layout{display:flex;height:calc(100vh - 54px);position:relative;z-index:1}
 
@@ -1167,6 +1198,7 @@ body.pt-3 .nlt td:first-child{color:#D97757!important}
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <div class="hdr-sep"></div>
     <button class="btn btn-print" onclick="openPrintModal()">🖨️ 인쇄</button>
+    <a class="btn-feedback no-print" href="https://obangti.tistory.com" target="_blank" rel="noopener noreferrer" aria-label="문의 및 오류 피드백">✏️</a>
   </div>
 </div>
 
