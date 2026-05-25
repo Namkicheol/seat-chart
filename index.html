@@ -1534,20 +1534,29 @@ function initSeats(){
   const t=getTotal();
   const base=COLS*ROWS;
   seats=Array.from({length:t},()=>null);
-  // 메인 그리드(ROWS×COLS)에는 처음 base명을 우열(右→左) 배치
-  // 학생수<좌석수일 때 빈 자리가 partial column으로 흩어지지 않고
-  // 한 '행'으로 묶이도록 사용 행수(neededRows)만큼만 사용.
+  // 칠판(r=0, 아래쪽)부터 행 단위로 채움.
+  // 학생수가 행을 다 채우지 못하면 마지막 partial 행을 맨 위(r=가장 큰 값)에 가운데 정렬.
   const inMain=Math.min(students.length,base);
-  const neededRows=Math.max(1,Math.min(ROWS,Math.ceil(inMain/COLS)));
-  for(let si=0;si<inMain;si++){
-    const col=(COLS-1)-Math.floor(si/neededRows);
-    const row=(neededRows-1)-(si%neededRows);
-    const idx=row*COLS+col;
-    if(idx>=0&&idx<base)seats[idx]=si;
+  const fullBottomRows=Math.floor(inMain/COLS);
+  const partial=inMain%COLS;
+  let si=0;
+  // 아래(칠판 쪽)부터 한 행씩 가득 채움
+  for(let r=0;r<fullBottomRows&&r<ROWS;r++){
+    for(let c=0;c<COLS;c++){
+      seats[r*COLS+c]=si++;
+    }
+  }
+  // 남은 학생(partial)은 맨 위 행에 가운데 정렬
+  if(partial>0&&fullBottomRows<ROWS){
+    const topR=fullBottomRows;
+    const startCol=Math.floor((COLS-partial)/2);
+    for(let c=0;c<partial;c++){
+      seats[topR*COLS+startCol+c]=si++;
+    }
   }
   // 보너스 좌석(base 이상 인덱스)에는 base를 초과한 학생을 순서대로 배치
-  for(let si=base;si<students.length&&si<t;si++){
-    seats[si]=si;
+  for(let si2=base;si2<students.length&&si2<t;si2++){
+    seats[si2]=si2;
   }
 }
 
@@ -1999,10 +2008,11 @@ function randomize(){
 }
 function randomizeExcludeFixed(){
   pushUndo();
+  // 비고정 위치 중 학생이 있는 자리만 셔플 (빈자리 위치는 보존)
   const mv=seats.map((_,i)=>i).filter(i=>!fixed.has(i));
   const v=mv.map(i=>seats[i]).filter(x=>x!==null);
   shuffle(v);let vi=0;
-  mv.forEach(i=>{seats[i]=vi<v.length?v[vi++]:null;});
+  mv.forEach(i=>{if(seats[i]!==null)seats[i]=v[vi++];});
   animAll();render();autoSave();
 }
 function animAll(){
