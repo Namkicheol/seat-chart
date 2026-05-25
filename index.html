@@ -2094,7 +2094,7 @@ function addEditRowAt(i,id,name){
   const tr=document.createElement('tr');
   tr.dataset.rowIdx=i;
   tr.innerHTML=`<td class="rlbl">${i+1}</td>
-    <td><input type="text" placeholder="(선택)" value="${id}" id="eid_${i}" maxlength="12"></td>
+    <td><input type="text" placeholder="예: 1101" value="${id}" id="eid_${i}" maxlength="12"></td>
     <td><input type="text" placeholder="이름" value="${name}" id="enm_${i}" maxlength="10"></td>
     <td class="rdel"><button type="button" class="btn-del-row" title="행 삭제" onclick="delEditRow(${i})">✕</button></td>`;
   tb.appendChild(tr);
