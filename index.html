@@ -338,7 +338,8 @@ body::before{
   transform:scale(1.04);
 }
 @media print{
-  .seat.ph-slot{display:none!important}
+  /* 자리 추가 placeholder는 인쇄에서 숨기되 그리드 자리는 유지 (다른 자리 위치 보존) */
+  .seat.ph-slot{visibility:hidden!important}
 }
 /* PAIR MODE는 wrapper 굵은 테두리만으로 짝 그룹 표시 — 좌석 색은 테마 그대로 유지 */
 
