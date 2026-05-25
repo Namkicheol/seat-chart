@@ -731,6 +731,8 @@ body::before{
   /* seat grid print */
   .seat-grid{gap:4px!important;align-content:start!important;flex:1!important;}
   .seat{width:var(--pw,110px)!important;height:var(--ph,62px)!important;border-radius:8px!important;transform:none!important;}
+  /* 인쇄 시 빈자리는 자리(grid cell)는 유지하되 시각적으로 숨김 */
+  .seat.empty{visibility:hidden!important}
   /* 캐릭터 테마(pt-2) 외에는 ::before 숨김 */
   body:not(.pt-2) .seat::before{display:none!important}
   .sname{font-size:var(--pname,15px)!important;font-weight:900!important;font-family:var(--ui-font)!important}
