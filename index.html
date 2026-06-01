@@ -741,8 +741,8 @@ body::before{
   .nlt th,.nlt td{font-family:var(--ui-font)!important}
   .class-info-print{font-family:var(--ui-font)!important}
 
-  /* fixed seat pin icon */
-  .seat.fx::after{content:'📌';font-size:9px!important;top:2px!important;right:4px!important}
+  /* 인쇄 시 고정 핀 숨김 */
+  .seat.fx::after{display:none!important}
   /* pair wrapper print — 굵은 테두리는 살리고 배경/색만 제거 */
   .seat-pair-wrap{border-width:2.5px!important;border-style:solid!important;background:transparent!important;padding:3px!important;gap:4px!important;}
   .seat-row{gap:10px!important}
