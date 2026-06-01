@@ -132,18 +132,6 @@ body::before{
 .sb-stat{font-size:11px;color:var(--ink2);margin-top:4px}
 .sb-stat strong{color:var(--wood)}
 .sb-warn{font-size:11px;color:var(--acc);margin-top:4px;font-weight:600}
-.student-list{display:flex;flex-direction:column;gap:3px;max-height:200px;overflow-y:auto}
-.chip{
-  display:flex;align-items:center;gap:5px;padding:4px 7px;border-radius:7px;
-  background:#FDF8F0;border:1px solid var(--chalk2);
-  font-size:11px;color:var(--ink2);
-}
-.chip.fx{background:rgba(46,125,50,.07);border-color:rgba(46,125,50,.2)}
-.chip.unplaced{background:rgba(229,57,53,.08);border-color:rgba(229,57,53,.28);color:#C62828}
-.chip.unplaced .nbadge{color:#C62828}
-.udot{margin-left:auto;color:#C62828;font-size:13px;font-weight:700;flex-shrink:0}
-.nbadge{font-size:10px;font-weight:700;color:var(--wood);min-width:20px}
-.fdot{width:7px;height:7px;border-radius:50%;background:#2E7D32;margin-left:auto;flex-shrink:0}
 .sb-tip{font-size:11px;color:var(--ink2);line-height:1.9}
 .sb-tip b{color:var(--wood)}
 .tip-hl{display:inline-block;background:linear-gradient(135deg,#FFF59D,#FFE082);color:#5D4037;padding:2px 7px;border-radius:6px;border:1.5px solid #F9A825;font-weight:700;box-shadow:0 1px 3px rgba(249,168,37,.25)}
@@ -1220,10 +1208,6 @@ body.pt-3 .nlt td:first-child{color:#D97757!important}
       <div class="sb-stat">총 <strong id="totalSeats">25</strong>석 / <strong id="totalStudents">25</strong>명</div>
       <div class="sb-warn" id="overWarn" style="display:none">⚠️ 학생이 좌석보다 많아요!</div>
     </div>
-    <div class="sb-sec">
-      <div class="sb-lbl">📋 학생 목록</div>
-      <div class="student-list" id="sidebarList"></div>
-    </div>
     <div class="pair-toggle" id="pairToggle" onclick="togglePairMode()">
       <span>👥 짝 구분 표시</span>
       <div class="pair-sw"></div>
@@ -1668,7 +1652,7 @@ function importData(e){
 
 /* ── RENDER ── */
 function render(){
-  renderGrid();renderNameList();renderSidebar();
+  renderGrid();renderNameList();
   const total=getTotal();
   const stCount=students.filter(s=>s.name).length;
   document.getElementById('totalSeats').textContent=total+(bonus>0?` (+${bonus})`:'');
@@ -1908,21 +1892,6 @@ function renderNameList(){
   document.documentElement.style.setProperty('--list-pad-screen',pv+'px');
 }
 
-function renderSidebar(){
-  const l=document.getElementById('sidebarList');l.innerHTML='';
-  students.forEach((s,i)=>{
-    if(!s.name)return;
-    const si=seats.indexOf(i);
-    const isFx=si>=0&&fixed.has(si);
-    const isUnplaced=si<0;
-    const d=document.createElement('div');
-    d.className='chip'+(isFx?' fx':'')+(isUnplaced?' unplaced':'');
-    const tag=isUnplaced?'<span class="udot" title="좌석 미배치">⊘</span>':'';
-    d.innerHTML=`<span class="nbadge">${s.id}</span><span>${s.name}</span>${isFx?'<span class="fdot"></span>':''}${tag}`;
-    l.appendChild(d);
-  });
-}
-
 /* ── 자리 조작 ── */
 function clickSeat(i){
   if(sel===null){
@@ -1947,7 +1916,7 @@ function clickSeat(i){
 function toggleFixed(i){
   pushUndo();
   if(fixed.has(i))fixed.delete(i);else fixed.add(i);
-  updateSeatEl(i);renderSidebar();autoSave();updatePinBtn();
+  updateSeatEl(i);autoSave();updatePinBtn();
 }
 
 function pinSelected(){
@@ -1978,7 +1947,7 @@ function clearSel(){
   if(prev!==null)updateSeatEl(prev);
   updatePinBtn();
 }
-function clearFixed(){pushUndo();fixed.clear();renderGrid();renderSidebar();autoSave();toast('🔓 모든 고정 해제 완료');}
+function clearFixed(){pushUndo();fixed.clear();renderGrid();autoSave();toast('🔓 모든 고정 해제 완료');}
 
 /* ── PAIR MODE ── */
 function togglePairMode(){
