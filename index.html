@@ -134,6 +134,8 @@ body::before{
 .sb-warn{font-size:11px;color:var(--acc);margin-top:4px;font-weight:600}
 .sb-tip{font-size:11px;color:var(--ink2);line-height:1.9}
 .sb-tip b{color:var(--wood)}
+.sb-mail{color:var(--wood);font-weight:700;text-decoration:underline;word-break:break-all}
+.sb-mail:hover{color:#D97757}
 .tip-hl{display:inline-block;background:linear-gradient(135deg,#FFF59D,#FFE082);color:#5D4037;padding:2px 7px;border-radius:6px;border:1.5px solid #F9A825;font-weight:700;box-shadow:0 1px 3px rgba(249,168,37,.25)}
 .tip-hl b{color:#5D4037!important}
 .sb-credit{margin-top:auto;padding:10px 4px 4px;text-align:center;font-size:10px;color:var(--ink2);opacity:.55;letter-spacing:.5px;font-family:var(--ui-font)}
@@ -1161,13 +1163,42 @@ body.pt-3 .nlt-head-txt{color:#F4F3EE!important}
 body.pt-3 .nlt th{background:#F4F3EE!important;color:#3A2A1F!important;border-bottom-color:#D97757!important}
 body.pt-3 .nlt td{border-bottom-color:#EDE9DD!important}
 body.pt-3 .nlt td:first-child{color:#D97757!important}
+
+/* ── 교사 모드(숨김) ── */
+.seat.scrambling .sname{filter:blur(1.5px);opacity:.85;transition:none}
+.seat.scrambling{transition:none}
+#teacherPanel{
+  display:none;position:fixed;left:18px;bottom:18px;z-index:9998;
+  width:248px;padding:14px 14px 12px;border-radius:14px;
+  background:rgba(38,24,16,.94);color:#F4F3EE;
+  box-shadow:0 14px 34px rgba(0,0,0,.38);border:1px solid rgba(217,119,87,.5);
+  font-family:'Noto Sans KR',sans-serif;font-size:13px;backdrop-filter:blur(4px);
+}
+#teacherPanel.open{display:block}
+#teacherPanel .tp-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+#teacherPanel .tp-title{font-weight:700;font-size:13px;letter-spacing:.2px}
+#teacherPanel .tp-x{cursor:pointer;opacity:.6;font-size:15px;line-height:1;background:none;border:none;color:#F4F3EE}
+#teacherPanel .tp-x:hover{opacity:1}
+#teacherPanel .tp-status{font-size:11.5px;opacity:.82;margin:2px 0 10px;line-height:1.5}
+#teacherPanel .tp-status b{color:#FFD9A0}
+#teacherPanel .tp-btn{
+  display:block;width:100%;margin:6px 0;padding:9px 10px;border-radius:9px;
+  border:1px solid rgba(244,243,238,.18);background:rgba(244,243,238,.08);
+  color:#F4F3EE;font-size:12.5px;font-weight:600;cursor:pointer;text-align:left;
+}
+#teacherPanel .tp-btn:hover{background:rgba(244,243,238,.16)}
+#teacherPanel .tp-btn.arm{border-color:rgba(217,119,87,.6)}
+#teacherPanel .tp-btn.arm.is-armed{background:#D97757;border-color:#D97757;color:#fff}
+#teacherPanel .tp-btn.danger:hover{background:rgba(229,115,115,.28)}
+#teacherPanel .tp-hint{font-size:10.5px;opacity:.5;margin-top:8px;line-height:1.45}
+@media print{#teacherPanel{display:none!important}}
 </style>
 </head>
 <body class="pt-0">
 
 <!-- HEADER -->
 <div class="hdr no-print">
-  <span class="hdr-title">🏫 자리 배치표</span>
+  <span class="hdr-title" id="hdrTitle">🏫 자리 배치표</span>
   <div class="hdr-btns">
     <button class="btn btn-undo" id="undoBtn" onclick="doUndo()" disabled title="직전 작업 되돌리기">↩️ 실행취소</button>
     <div class="hdr-sep"></div>
@@ -1184,8 +1215,20 @@ body.pt-3 .nlt td:first-child{color:#D97757!important}
     <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
     <div class="hdr-sep"></div>
     <button class="btn btn-print" onclick="openPrintModal()">🖨️ 인쇄</button>
-    <a class="btn-feedback no-print" href="https://obangti.tistory.com" target="_blank" rel="noopener noreferrer" aria-label="문의 및 오류 피드백">✏️</a>
   </div>
+</div>
+
+<!-- 교사 모드 패널 (숨김: Ctrl+Shift+T 로 토글) -->
+<div id="teacherPanel" class="no-print" aria-hidden="true">
+  <div class="tp-head">
+    <span class="tp-title">🎬 교사 모드</span>
+    <button class="tp-x" onclick="toggleTeacher(false)" title="닫기 (제목 3번 클릭으로 다시 열기)">✕</button>
+  </div>
+  <div class="tp-status" id="tpStatus">목표 배치: <b>없음</b></div>
+  <button class="tp-btn" onclick="saveRigTarget()">📍 현재 배치를 목표로 저장</button>
+  <button class="tp-btn arm" id="tpArmBtn" onclick="toggleArm()">🎬 다음 ‘전체 랜덤’을 목표로</button>
+  <button class="tp-btn danger" onclick="clearRigTarget()">🗑️ 목표 삭제</button>
+  <div class="tp-hint">① 원하는 자리로 배치 → 📍 저장(화면은 자동으로 섞여 답이 가려져요). ② 수업 때 🎬 장전 → 평소처럼 🔀 전체 랜덤을 누르면 이름이 섞이다가 저장한 배치로 멈춥니다. 한 번 쓰면 자동 해제돼요.</div>
 </div>
 
 <div class="layout">
@@ -1217,6 +1260,13 @@ body.pt-3 .nlt td:first-child{color:#D97757!important}
         • <b>📌 고정/해제</b> 버튼 사용<br>
         • 우클릭도 고정 가능<br>
         • 명렬 입력 → <b>자동저장</b>
+      </div>
+    </div>
+    <div class="sb-sec">
+      <div class="sb-lbl">🛠️ 오류신고</div>
+      <div class="sb-tip">
+        버그·개선 의견은 메일로 보내주세요<br>
+        <a href="mailto:obangti@gmail.com?subject=%5B%EC%9E%90%EB%A6%AC%EB%B0%B0%EC%B9%98%ED%91%9C%5D%20%EC%98%A4%EB%A5%98%EC%8B%A0%EA%B3%A0" onclick="reportBug(event)" class="sb-mail">obangti@gmail.com</a>
       </div>
     </div>
     <div class="sb-credit no-print">made by kicheol Nam</div>
@@ -1381,6 +1431,7 @@ body.pt-3 .nlt td:first-child{color:#D97757!important}
 <script>
 let COLS=5,ROWS=5,bonus=0;
 let students=[],seats=[],fixed=new Set(),sel=null;
+let rigTarget=null,rigArmed=false,rigBusy=false;
 let pairMode=false;
 let printTheme=0;
 let activeTab='input';
@@ -1540,7 +1591,7 @@ function initSeats(){
 
 /* ── 저장 ── */
 function autoSave(){
-  try{localStorage.setItem('seatApp7',JSON.stringify({COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher}));}catch(e){}
+  try{localStorage.setItem('seatApp7',JSON.stringify({COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher,rigTarget}));}catch(e){}
 }
 
 /* ── 실행취소 (Undo) ── */
@@ -1579,6 +1630,7 @@ function loadLocal(){
     COLS=d.COLS||5;ROWS=d.ROWS||5;bonus=d.bonus||0;
     students=d.students||[];seats=d.seats||[];
     fixed=new Set(d.fixed||[]);
+    rigTarget=Array.isArray(d.rigTarget)?d.rigTarget:null;
     pairMode=!!d.pairMode;
     printTheme=d.printTheme||0;
     // 구버전(classInfo 단일 문자열) 호환
@@ -1601,7 +1653,7 @@ function openImportDialog(){
   setTimeout(()=>document.getElementById('importFile').click(),200);
 }
 function exportData(){
-  const data={version:3,COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher};
+  const data={version:3,COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher,rigTarget};
   const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
   const url=URL.createObjectURL(blob);
   const a=document.createElement('a');
@@ -1621,6 +1673,7 @@ function importData(e){
       COLS=d.COLS||5;ROWS=d.ROWS||5;bonus=d.bonus||0;
       students=d.students;seats=d.seats;
       fixed=new Set(d.fixed||[]);
+      rigTarget=Array.isArray(d.rigTarget)?d.rigTarget:null;
       pairMode=!!d.pairMode;
       printTheme=d.printTheme||0;
       if(d.classGrade!==undefined||d.classTeacher!==undefined){
@@ -1964,6 +2017,8 @@ function applyPairVisual(){
 /* ── 랜덤 ── */
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function randomize(){
+  if(rigBusy)return;
+  if(rigArmed&&rigTarget&&rigTarget.length){riggedReveal();return;}
   pushUndo();
   const f=seats.filter(s=>s!==null);shuffle(f);let fi=0;
   seats=seats.map(s=>s!==null?f[fi++]:null);
@@ -1977,6 +2032,91 @@ function randomizeExcludeFixed(){
   shuffle(v);let vi=0;
   mv.forEach(i=>{if(seats[i]!==null)seats[i]=v[vi++];});
   animAll();render();autoSave();
+}
+
+/* ── 오류 신고: 메일 클라이언트가 없어도 동작하도록 Gmail 작성창 + 주소 복사 ── */
+function reportBug(e){
+  if(e)e.preventDefault();
+  const addr='obangti@gmail.com';
+  const su=encodeURIComponent('[자리배치표] 오류신고');
+  try{ if(navigator.clipboard)navigator.clipboard.writeText(addr); }catch(_){}
+  try{ window.open('https://mail.google.com/mail/?view=cm&fs=1&to='+addr+'&su='+su,'_blank','noopener'); }catch(_){}
+  toast('🐞 오류 신고 창을 열었어요 · 주소도 복사됨: '+addr);
+}
+
+/* ── 교사 모드: 미리 세팅한 자리로 '샤사삭' 착지 ── */
+function toggleTeacher(force){
+  const p=document.getElementById('teacherPanel');
+  const open=(typeof force==='boolean')?force:!p.classList.contains('open');
+  p.classList.toggle('open',open);
+  p.setAttribute('aria-hidden',open?'false':'true');
+  if(open)updateTeacherPanel();
+}
+function rigTargetCount(){return rigTarget?rigTarget.filter(x=>x!==null&&x!==undefined).length:0;}
+function updateTeacherPanel(){
+  const st=document.getElementById('tpStatus');
+  const arm=document.getElementById('tpArmBtn');
+  if(st){
+    st.innerHTML=rigTarget?`목표 배치: <b>저장됨 (${rigTargetCount()}자리)</b>`:'목표 배치: <b>없음</b>';
+  }
+  if(arm){
+    arm.classList.toggle('is-armed',rigArmed);
+    arm.textContent=rigArmed?'🔴 장전됨 — 다음 랜덤에 발동':'🎬 다음 ‘전체 랜덤’을 목표로';
+  }
+}
+function saveRigTarget(){
+  // seats[i] = students 인덱스(또는 null). 명렬 순서가 바뀌어도 안전하도록 학생 id로 저장.
+  if(!seats.some(si=>si!==null&&students[si]&&students[si].name)){toast('먼저 학생을 배치한 뒤 저장하세요');return;}
+  pushUndo();
+  rigTarget=seats.map(si=>(si!==null&&students[si]&&students[si].name)?students[si].id:null);
+  // ★ 저장 직후 화면은 일부러 진짜 랜덤으로 흐트러뜨려 '답'을 감춘다.
+  //   (이 흐트러진 배치가 저장/다음 실행 시 화면에 뜨고, 진짜 목표는 숨겨진 채 보관)
+  const f=seats.filter(s=>s!==null);shuffle(f);let fi=0;
+  seats=seats.map(s=>s!==null?f[fi++]:null);
+  render();autoSave();updateTeacherPanel();
+  toast('📍 목표 저장 완료! 화면은 일부러 다르게 섞어뒀어요. 수업 때 🎬 장전 → 🔀 전체 랜덤이면 이 배치로 돌아옵니다');
+}
+function clearRigTarget(){
+  rigTarget=null;rigArmed=false;autoSave();updateTeacherPanel();
+  toast('🗑️ 목표 배치를 삭제했어요');
+}
+function toggleArm(){
+  if(!rigTarget||!rigTargetCount()){toast('먼저 목표 배치를 저장하세요');return;}
+  rigArmed=!rigArmed;updateTeacherPanel();
+  toast(rigArmed?'🔴 장전 완료 — 이제 🔀 전체 랜덤을 누르세요':'장전을 해제했어요');
+}
+function riggedReveal(){
+  rigBusy=true;
+  pushUndo();
+  // 목표(학생 id) → 현재 students 인덱스로 변환
+  const idToIdx={};
+  students.forEach((s,idx)=>{if(s&&s.id!==undefined&&s.id!=='')idToIdx[s.id]=idx;});
+  const target=seats.map((_,i)=>{
+    const id=rigTarget[i];
+    return (id!==null&&id!==undefined&&idToIdx[id]!==undefined)?idToIdx[id]:null;
+  });
+  const pool=students.map((s,idx)=>(s&&s.name)?idx:null).filter(x=>x!==null);
+  let t=0;const TICKS=16;
+  const iv=setInterval(()=>{
+    t++;
+    document.querySelectorAll('#seatGrid .seat').forEach(el=>{
+      if(el.classList.contains('empty'))return; // 빈 자리는 그대로
+      const nm=el.querySelector('.sname'),idd=el.querySelector('.sid');
+      if(!nm||!pool.length)return;
+      const si=pool[Math.floor(Math.random()*pool.length)];
+      nm.textContent=students[si].name;if(idd)idd.textContent=students[si].id+'번';
+      el.classList.add('scrambling');
+    });
+    if(t>=TICKS){
+      clearInterval(iv);
+      seats=target.slice();
+      render();
+      document.querySelectorAll('#seatGrid .seat').forEach(el=>el.classList.remove('scrambling'));
+      animAll();autoSave();
+      rigBusy=false;rigArmed=false;updateTeacherPanel();
+      toast('🔀 자리 배치 완성!');
+    }
+  },70);
 }
 function animAll(){
   setTimeout(()=>{
@@ -2332,6 +2472,19 @@ window.addEventListener('resize',()=>{
 });
 
 /* ── 방향키로 자리 이동 ── */
+// 교사 모드 토글 (숨김 제스처: 제목 '🏫 자리 배치표'를 1.2초 안에 3번 클릭)
+(function(){
+  let cnt=0,timer=null;
+  const t=document.getElementById('hdrTitle');
+  if(!t)return;
+  t.addEventListener('click',()=>{
+    cnt++;
+    clearTimeout(timer);
+    timer=setTimeout(()=>{cnt=0;},1200);
+    if(cnt>=3){cnt=0;clearTimeout(timer);toggleTeacher();}
+  });
+})();
+
 document.addEventListener('keydown',e=>{
   const tag=(e.target&&e.target.tagName)||'';
   if(tag==='INPUT'||tag==='TEXTAREA')return;
