@@ -97,6 +97,41 @@ body::before{
 .btn-feedback:hover::after{opacity:1;transform:translateY(0)}
 .btn-feedback:active{transform:translateY(0) scale(1.02)}
 
+/* ── ERROR REPORT ── */
+.report-overlay[hidden]{display:none!important}
+.report-overlay{
+  position:fixed;inset:0;z-index:10000;display:grid;place-items:center;
+  padding:18px;background:rgba(28,16,10,.62);
+}
+.report-panel{
+  width:min(500px,100%);max-height:92vh;overflow:auto;
+  background:#fff;color:var(--ink);border:1px solid var(--chalk2);
+  border-radius:18px;padding:22px;box-shadow:0 28px 80px rgba(44,24,16,.38);
+}
+.report-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:16px}
+.report-title{font-family:'Gaegu',cursive;font-size:25px;line-height:1.2;color:var(--wood-dark)}
+.report-sub{font-size:12px;line-height:1.6;color:var(--ink2);margin-top:4px}
+.report-close{width:34px;height:34px;border:0;border-radius:50%;background:var(--cream2);color:var(--wood);font-size:20px;cursor:pointer;flex-shrink:0}
+.report-form{display:grid;gap:13px}
+.report-field{display:grid;gap:6px;font-size:12px;font-weight:700;color:var(--ink2)}
+.report-field input,.report-field select,.report-field textarea{
+  width:100%;border:1.5px solid var(--chalk2);border-radius:10px;
+  padding:10px 11px;background:#fff;color:var(--ink);font:inherit;font-weight:500;outline:none;
+}
+.report-field input:focus,.report-field select:focus,.report-field textarea:focus{border-color:var(--wood);box-shadow:0 0 0 3px rgba(139,94,60,.1)}
+.report-field textarea{min-height:120px;resize:vertical;line-height:1.6}
+.report-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:2px}
+.report-btn{border:0;border-radius:10px;padding:10px 15px;font:inherit;font-size:12px;font-weight:800;cursor:pointer}
+.report-btn.primary{background:linear-gradient(135deg,var(--wood-dark),var(--wood));color:#FFF9C4}
+.report-btn.secondary{background:var(--cream2);color:var(--ink2)}
+.report-status{min-height:20px;font-size:12px;font-weight:700;color:var(--teal)}
+.report-hp{position:absolute!important;left:-9999px!important;width:1px!important;height:1px!important;overflow:hidden!important}
+@media(max-width:520px){
+  .report-panel{padding:18px;border-radius:15px}
+  .report-actions{flex-direction:column-reverse}
+  .report-btn{width:100%}
+}
+
 /* ── LAYOUT ── */
 .layout{display:flex;height:calc(100vh - 54px);position:relative;z-index:1}
 
@@ -134,7 +169,7 @@ body::before{
 .sb-warn{font-size:11px;color:var(--acc);margin-top:4px;font-weight:600}
 .sb-tip{font-size:11px;color:var(--ink2);line-height:1.9}
 .sb-tip b{color:var(--wood)}
-.sb-mail{color:var(--wood);font-weight:700;text-decoration:underline;word-break:break-all}
+.sb-mail{border:0;background:none;padding:0;color:var(--wood);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer}
 .sb-mail:hover{color:#D97757}
 .tip-hl{display:inline-block;background:linear-gradient(135deg,#FFF59D,#FFE082);color:#5D4037;padding:2px 7px;border-radius:6px;border:1.5px solid #F9A825;font-weight:700;box-shadow:0 1px 3px rgba(249,168,37,.25)}
 .tip-hl b{color:#5D4037!important}
@@ -1265,8 +1300,8 @@ body.pt-3 .nlt td:first-child{color:#D97757!important}
     <div class="sb-sec">
       <div class="sb-lbl">🛠️ 오류신고</div>
       <div class="sb-tip">
-        버그·개선 의견은 메일로 보내주세요<br>
-        <a href="mailto:obangti@gmail.com?subject=%5B%EC%9E%90%EB%A6%AC%EB%B0%B0%EC%B9%98%ED%91%9C%5D%20%EC%98%A4%EB%A5%98%EC%8B%A0%EA%B3%A0" onclick="reportBug(event)" class="sb-mail">obangti@gmail.com</a>
+        버그·개선 의견을 바로 접수할 수 있어요.<br>
+        <button type="button" onclick="openErrorReport()" class="sb-mail">오류 신고 보내기</button>
       </div>
     </div>
     <div class="sb-credit no-print">made by kicheol Nam</div>
@@ -1418,6 +1453,41 @@ body.pt-3 .nlt td:first-child{color:#D97757!important}
   </div>
 </div>
 
+<div class="report-overlay no-print" id="errorReportModal" hidden>
+  <div class="report-panel" role="dialog" aria-modal="true" aria-labelledby="errorReportTitle">
+    <div class="report-head">
+      <div>
+        <h2 class="report-title" id="errorReportTitle">오류 신고</h2>
+        <p class="report-sub">현재 페이지와 좌석 설정이 함께 전달됩니다.</p>
+      </div>
+      <button class="report-close" type="button" onclick="closeErrorReport()" aria-label="닫기">×</button>
+    </div>
+    <form class="report-form" id="errorReportForm" onsubmit="submitErrorReport(event)">
+      <label class="report-field">오류 종류
+        <select name="category" required>
+          <option value="기능">기능</option>
+          <option value="화면">화면</option>
+          <option value="인쇄">인쇄</option>
+          <option value="저장·불러오기">저장·불러오기</option>
+          <option value="기타">기타</option>
+        </select>
+      </label>
+      <label class="report-field">오류 내용
+        <textarea name="description" minlength="10" maxlength="2000" required placeholder="어떤 작업 중에 무엇이 잘못되었는지 적어 주세요."></textarea>
+      </label>
+      <label class="report-field">회신받을 이메일 (선택)
+        <input type="email" name="reporter_email" autocomplete="email" placeholder="name@example.com">
+      </label>
+      <label class="report-hp" aria-hidden="true">웹사이트<input type="text" name="website" tabindex="-1" autocomplete="off"></label>
+      <p class="report-status" id="errorReportStatus" aria-live="polite"></p>
+      <div class="report-actions">
+        <button class="report-btn secondary" type="button" onclick="closeErrorReport()">취소</button>
+        <button class="report-btn primary" type="submit">오류 신고 보내기</button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <!-- Print frame: L-bracket corner ornaments -->
@@ -1437,7 +1507,61 @@ let printTheme=0;
 let activeTab='input';
 let parsedFileStudents=null;
 let dragSrcIdx=null;
+const ERROR_REPORT_ENDPOINT='';
+const ERROR_REPORT_EMAIL='obangti@gmail.com';
 function getTotal(){return COLS*ROWS+bonus;}
+
+function openErrorReport(){
+  const modal=document.getElementById('errorReportModal');
+  modal.hidden=false;
+  modal.querySelector('select').focus();
+}
+function closeErrorReport(){
+  document.getElementById('errorReportModal').hidden=true;
+  document.getElementById('errorReportStatus').textContent='';
+}
+async function submitErrorReport(event){
+  event.preventDefault();
+  const form=event.currentTarget;
+  const submit=form.querySelector('[type="submit"]');
+  const status=document.getElementById('errorReportStatus');
+  const values=Object.fromEntries(new FormData(form).entries());
+  values.action='report';
+  values.site='seat-chart';
+  values.page_url=location.href;
+  values.item_id=`${COLS}열 × ${ROWS}행 · ${students.length}명`;
+  submit.disabled=true;
+  status.textContent='전송 중…';
+
+  if(!ERROR_REPORT_ENDPOINT){
+    const subject='[자리 배치표 오류 신고] '+values.category;
+    const body=`페이지: ${values.page_url}\n좌석 설정: ${values.item_id}\n종류: ${values.category}\n\n${values.description}`;
+    location.href=`mailto:${ERROR_REPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    status.textContent='메일 작성 창을 열었습니다.';
+    submit.disabled=false;
+    return;
+  }
+
+  try{
+    await fetch(ERROR_REPORT_ENDPOINT,{
+      method:'POST',mode:'no-cors',
+      headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+      body:new URLSearchParams(values).toString()
+    });
+    form.reset();
+    status.textContent='오류 신고를 접수했습니다. 감사합니다.';
+  }catch(error){
+    status.textContent='자동 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+  }finally{
+    submit.disabled=false;
+  }
+}
+document.getElementById('errorReportModal').addEventListener('click',event=>{
+  if(event.target.id==='errorReportModal')closeErrorReport();
+});
+document.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&!document.getElementById('errorReportModal').hidden)closeErrorReport();
+});
 
 /* ── THEMES ── */
 const THEMES=[
@@ -2032,16 +2156,6 @@ function randomizeExcludeFixed(){
   shuffle(v);let vi=0;
   mv.forEach(i=>{if(seats[i]!==null)seats[i]=v[vi++];});
   animAll();render();autoSave();
-}
-
-/* ── 오류 신고: 메일 클라이언트가 없어도 동작하도록 Gmail 작성창 + 주소 복사 ── */
-function reportBug(e){
-  if(e)e.preventDefault();
-  const addr='obangti@gmail.com';
-  const su=encodeURIComponent('[자리배치표] 오류신고');
-  try{ if(navigator.clipboard)navigator.clipboard.writeText(addr); }catch(_){}
-  try{ window.open('https://mail.google.com/mail/?view=cm&fs=1&to='+addr+'&su='+su,'_blank','noopener'); }catch(_){}
-  toast('🐞 오류 신고 창을 열었어요 · 주소도 복사됨: '+addr);
 }
 
 /* ── 교사 모드: 미리 세팅한 자리로 '샤사삭' 착지 ── */
