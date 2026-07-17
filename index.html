@@ -1507,8 +1507,7 @@ let printTheme=0;
 let activeTab='input';
 let parsedFileStudents=null;
 let dragSrcIdx=null;
-const ERROR_REPORT_ENDPOINT='';
-const ERROR_REPORT_EMAIL='obangti@gmail.com';
+const ERROR_REPORT_ENDPOINT='https://script.google.com/macros/s/AKfycbydH6votgBeiUvt65idb3kWUfVP6lBeJRsuUn_6Ts6KiVwLkhdfSDCkJEXKqWEShsat0A/exec';
 function getTotal(){return COLS*ROWS+bonus;}
 
 function openErrorReport(){
@@ -1534,10 +1533,7 @@ async function submitErrorReport(event){
   status.textContent='전송 중…';
 
   if(!ERROR_REPORT_ENDPOINT){
-    const subject='[자리 배치표 오류 신고] '+values.category;
-    const body=`페이지: ${values.page_url}\n좌석 설정: ${values.item_id}\n종류: ${values.category}\n\n${values.description}`;
-    location.href=`mailto:${ERROR_REPORT_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    status.textContent='메일 작성 창을 열었습니다.';
+    status.textContent='현재 접수 시스템을 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.';
     submit.disabled=false;
     return;
   }
