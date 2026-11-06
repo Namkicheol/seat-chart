@@ -298,11 +298,14 @@ body::before{
   transform:translateY(-4px) scale(1.03);
 }
 /* 고정 좌석은 핀으로만 구분하고 테두리·배경은 일반 좌석과 동일하게 유지. */
-.seat.fx::after{
-  content:'📌';position:absolute;top:4px;right:5px;
-  display:block;font-size:13px;line-height:1;
-  pointer-events:none;
+.seat-pin{
+  position:absolute;top:1px;right:1px;z-index:2;
+  display:grid;place-items:center;width:28px;height:28px;padding:0;
+  border:0;border-radius:7px;background:transparent;
+  font-size:19px;line-height:1;cursor:pointer;touch-action:manipulation;
 }
+.seat-pin:hover{background:rgba(139,94,60,.1)}
+.seat-pin:focus-visible{outline:2px solid var(--wood);outline-offset:1px}
 .seat.empty{
   background:rgba(253,250,244,.5)!important;
   border:1.5px dashed var(--chalk2)!important;
@@ -371,6 +374,8 @@ body::before{
 .seat.dragging{opacity:.3;transform:scale(.95);pointer-events:none}
 /* 자식 요소가 드래그 이벤트를 가로채지 않도록 */
 .seat>*{pointer-events:none}
+.seat>.seat-pin{pointer-events:auto}
+.seat[aria-hidden="true"]>.seat-pin{pointer-events:none}
 .seat.drag-over{
   outline:2.5px dashed var(--wood)!important;
   outline-offset:3px;
@@ -761,7 +766,7 @@ body::before{
   .class-info-print{font-family:var(--ui-font)!important}
 
   /* 인쇄 시 고정 핀 숨김 */
-  .seat.fx::after{display:none!important}
+  .seat-pin{display:none!important}
   /* pair wrapper print — 굵은 테두리는 살리고 배경/색만 제거 */
   .seat-pair-wrap{border-width:2.5px!important;border-style:solid!important;background:transparent!important;padding:3px!important;gap:4px!important;}
   .seat-row{gap:10px!important}
@@ -1355,6 +1360,7 @@ body:is(.pt-2,.pt-5,.pt-6,.pt-8,.pt-9).char-narrow .sid{font-size:min(var(--sid-
         • 선택 후 <b>방향키</b>(↑↓←→)로 이동<br>
         • <b>↩️ 실행취소</b>로 직전 작업 되돌리기<br>
         • <b>📌 고정/해제</b> 버튼 사용<br>
+        • <b>좌석의 📌 핀을 누르면 고정 해제</b><br>
         • 우클릭도 고정 가능<br>
         • 명렬 입력 → <b>자동저장</b>
       </div>
@@ -2389,6 +2395,21 @@ function makeSeatEl(i){
     const idEl=document.createElement('div');
     idEl.className='sid';idEl.textContent=s.id+'번';el.appendChild(idEl);
   }else{nameEl.style.cssText='opacity:.3;font-size:13px';}
+  if(fixed.has(i)){
+    const pin=document.createElement('button');
+    pin.type='button';pin.className='seat-pin';pin.textContent='📌';
+    pin.title='누르면 고정 해제';
+    pin.setAttribute('aria-label',`${s?.name||'빈 자리'} 고정 해제`);
+    pin.onmousedown=e=>e.stopPropagation();
+    pin.ondblclick=e=>e.stopPropagation();
+    pin.oncontextmenu=e=>{e.preventDefault();e.stopPropagation();};
+    pin.onclick=e=>{
+      e.stopPropagation();
+      if(rigBusy||!fixed.has(i))return;
+      toggleFixed(i);toast('🔓 고정 해제됐어요');
+    };
+    el.appendChild(pin);
+  }
   el.oncontextmenu=e=>{e.preventDefault();toggleFixed(i);};
   // ── manual drag (mousedown/mousemove/mouseup) — HTML5 native drag가 일부 환경에서 동작 안 함 ──
   el.addEventListener('mousedown',e=>{
@@ -2403,6 +2424,8 @@ function makeSeatEl(i){
         el.classList.add('dragging');
         const rect=el.getBoundingClientRect();
         ghost=el.cloneNode(true);
+        ghost.setAttribute('aria-hidden','true');
+        ghost.inert=true;
         ghost.classList.remove('dragging','sel');
         ghost.style.cssText+=`;position:fixed;left:0;top:0;pointer-events:none;opacity:.85;z-index:99999;width:${rect.width}px;height:${rect.height}px;transition:none;transform:translate(${ev.clientX-rect.width/2}px,${ev.clientY-rect.height/2}px) rotate(-2deg);box-shadow:0 12px 28px rgba(44,24,16,.35)`;
         document.body.appendChild(ghost);
