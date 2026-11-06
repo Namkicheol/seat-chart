@@ -1199,6 +1199,30 @@ body:is(.pt-2,.pt-5,.pt-6,.pt-8,.pt-9).char-narrow .sid{font-size:min(var(--sid-
 .tsw-note{margin-top:3px;font-family:'Noto Sans KR',sans-serif;font-size:9px;line-height:1.4;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .art-credit{font-size:10px;line-height:1.6;color:var(--ink2);margin-top:9px}
 .art-credit a{color:inherit;text-underline-offset:2px}
+.character-modal{width:650px;max-width:96vw;max-height:90vh;overflow-y:auto;background:var(--cream);border:1.5px solid var(--chalk2);border-radius:18px;padding:22px;box-shadow:0 20px 56px rgba(44,24,16,.22)}
+.character-modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.character-close{border:0;background:transparent;color:var(--ink2);font-size:22px;line-height:1;cursor:pointer;padding:4px}
+.character-help{font-size:12px;line-height:1.6;color:var(--ink2);margin:0 0 14px}
+.character-student-row{display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:12px;background:#FFF;border:1px solid var(--chalk2);border-radius:12px}
+.character-current-art{width:54px;height:54px;flex-shrink:0;background-repeat:no-repeat}
+.character-student-field{flex:1;min-width:0;display:grid;gap:5px;font-size:12px;font-weight:700;color:var(--ink2)}
+.character-student-field select{width:100%;min-width:0;border:1px solid var(--chalk2);border-radius:8px;background:var(--cream);padding:8px;font:inherit;color:var(--ink)}
+.character-themes{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-bottom:8px}
+.character-theme-btn{min-width:0;min-height:35px;padding:7px 3px;border:1px solid var(--chalk2);border-radius:8px;background:#FFF;color:var(--ink2);font:600 11px/1.3 'Noto Sans KR',sans-serif;cursor:pointer}
+.character-theme-btn[aria-pressed="true"]{border-color:var(--wood);background:#FFF4DD;color:var(--wood-dark)}
+.character-style-note{min-height:18px;margin-bottom:10px;font-size:11px;color:var(--ink2);line-height:1.5}
+.character-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:7px}
+.character-option{position:relative;display:flex;align-items:center;justify-content:center;min-width:0;height:76px;padding:3px 2px 13px;border:1px solid #E4DED4;border-radius:11px;background:#FFF;cursor:pointer;color:var(--ink2)}
+.character-option:hover{background:#FFFCF5;border-color:#BBA58A}
+.character-option[aria-pressed="true"]{border:2px solid var(--wood);background:#FFF5E1}
+.character-option[aria-pressed="true"]::after{content:'✓';position:absolute;right:4px;top:3px;font-size:12px;font-weight:900;color:var(--wood)}
+.character-option-art{display:block;width:54px;height:54px;max-width:100%;background-repeat:no-repeat;pointer-events:none}
+.character-number{position:absolute;left:6px;bottom:4px;font:600 9px/1 'Noto Sans KR',sans-serif;color:#9B8F81}
+.character-used{position:absolute;right:5px;bottom:4px;font:600 9px/1 'Noto Sans KR',sans-serif;color:#8A715A}
+.character-option:focus-visible,.character-theme-btn:focus-visible,.character-close:focus-visible{outline:3px solid var(--wood);outline-offset:2px}
+.character-footer{position:sticky;bottom:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:15px;padding:12px 0 2px;background:var(--cream);border-top:1px solid var(--chalk2);box-shadow:0 -9px 14px var(--cream)}
+.character-status{min-height:18px;margin-top:9px;font-size:11px;line-height:1.5;color:var(--teal)}
+@media(max-width:460px){.character-modal{padding:16px}.character-grid{gap:5px}.character-option{height:67px}.character-option-art{width:47px;height:47px}.character-theme-btn{font-size:10px}.character-footer .btn-apply,.character-footer .btn-cancel{font-size:13px;padding:9px 12px}}
 @media print{
   body.pt-2{background:#FFFCF6!important}
   body.pt-2::before,body.pt-2::after,body:is(.pt-5,.pt-6,.pt-7,.pt-8,.pt-9)::before,body:is(.pt-5,.pt-6,.pt-7,.pt-8,.pt-9)::after{content:none!important}
@@ -1277,6 +1301,7 @@ body:is(.pt-2,.pt-5,.pt-6,.pt-8,.pt-9).char-narrow .sid{font-size:min(var(--sid-
     <button class="btn btn-edit btn-sm" onclick="clearFixed()" title="모든 고정 해제">🔓 전체해제</button>
     <div class="hdr-sep"></div>
     <button class="btn btn-edit" onclick="openStudentModal()">👥 학생 편집</button>
+    <button class="btn btn-edit btn-sm" id="characterSettingsBtn" onclick="openCharacterModal()" aria-controls="characterModal" title="학생별 캐릭터 선택·전체 섞기">🎨 캐릭터</button>
     <button class="btn btn-edit btn-sm" id="teacherSettingsBtn" onclick="toggleTeacher()" aria-controls="teacherPanel" aria-expanded="false" title="교사 설정 (Ctrl+Shift+T)">⚙️ 교사 설정</button>
     <div class="hdr-sep"></div>
     <button class="btn btn-exp"  onclick="exportData()">📤 내보내기</button>
@@ -1451,6 +1476,31 @@ body:is(.pt-2,.pt-5,.pt-6,.pt-8,.pt-9).char-narrow .sid{font-size:min(var(--sid-
     <div class="mfoot">
       <button class="btn-apply" onclick="applyStudentsFromActiveTab()">✅ 적용 · 저장</button>
       <button class="btn-cancel" onclick="closeModal('studentModal')">취소</button>
+    </div>
+  </div>
+</div>
+
+<!-- 학생별 캐릭터: 캐릭터 번호는 학생 정보에 함께 저장됩니다. -->
+<div class="moverlay no-print" id="characterModal">
+  <div class="character-modal" role="dialog" aria-modal="true" aria-labelledby="characterModalTitle" aria-describedby="characterModalHelp">
+    <div class="character-modal-head">
+      <div class="mtitle" id="characterModalTitle">🎨 우리 반 캐릭터</div>
+      <button type="button" class="character-close" onclick="closeCharacterModal()" aria-label="캐릭터 설정 닫기">×</button>
+    </div>
+    <p class="character-help" id="characterModalHelp">캐릭터는 학생을 따라다녀요. 자리를 섞어도 그대로예요.<br>학생을 고른 뒤 원하는 그림을 눌러 주세요. 같은 캐릭터를 함께 골라도 괜찮아요.</p>
+    <div class="character-student-row">
+      <span class="character-current-art" id="characterCurrentArt" aria-hidden="true"></span>
+      <label class="character-student-field">캐릭터를 바꿀 학생
+        <select id="characterStudentSelect" onchange="selectCharacterStudent(this.value)"></select>
+      </label>
+    </div>
+    <div class="character-themes" id="characterThemeChoices" role="group" aria-label="그림 테마"></div>
+    <div class="character-style-note" id="characterStyleNote"></div>
+    <div class="character-grid" id="characterGrid" role="group" aria-label="학생 캐릭터 선택"></div>
+    <div class="character-status" id="characterStatus" role="status" aria-live="polite"></div>
+    <div class="character-footer">
+      <button type="button" class="btn-apply" onclick="shuffleStudentCharacters()">🔀 캐릭터 전체 섞기</button>
+      <button type="button" class="btn-cancel" onclick="closeCharacterModal()">완료</button>
     </div>
   </div>
 </div>
@@ -1636,6 +1686,147 @@ const THEMES=[
   {name:'바닷속 친구들',art:'ocean',note:'물결 속 알록달록 바다 친구들',dot:'linear-gradient(135deg,#E7FAF8,#DCF0FF)',border:'#83BCBF'},
   {name:'우주 탐험대',art:'space',note:'별빛을 여행하는 말랑 친구들',dot:'linear-gradient(135deg,#EEE9FF,#E5F0FF)',border:'#A2A4D1'},
 ];
+
+/* ── 학생별 캐릭터 ── */
+const CHARACTER_COUNT=36;
+let characterStudentIndex=0,characterThemeIndex=2;
+function validCharacterIndex(index){return Number.isInteger(index)&&index>=0&&index<CHARACTER_COUNT;}
+function namedCharacterStudents(roster=students){return roster.map((student,index)=>({student,index})).filter(({student})=>student&&typeof student.name==='string'&&student.name.trim());}
+function ensureStudentCharacters(roster=students){
+  const people=namedCharacterStudents(roster),counts=Array(CHARACTER_COUNT).fill(0);
+  people.forEach(({student})=>{if(validCharacterIndex(student.characterIndex))counts[student.characterIndex]++;});
+  let changed=false;
+  people.forEach(({student})=>{
+    if(validCharacterIndex(student.characterIndex))return;
+    const least=Math.min(...counts);
+    const choices=counts.map((count,index)=>count===least?index:-1).filter(index=>index>=0);
+    const index=choices[Math.floor(Math.random()*choices.length)];
+    student.characterIndex=index;counts[index]++;changed=true;
+  });
+  return changed;
+}
+function preserveStudentCharacters(next,previous=students){
+  const used=new Set();
+  const uniqueMatch=(predicate)=>{
+    const matches=previous.map((student,index)=>({student,index})).filter(({student,index})=>!used.has(index)&&student&&predicate(student));
+    return matches.length===1?matches[0]:null;
+  };
+  next.forEach(student=>{
+    if(validCharacterIndex(student.characterIndex))return;
+    // Match names before an auto-generated row number so a pasted reorder keeps each person's art.
+    const match=uniqueMatch(old=>String(old.id)===String(student.id)&&old.name===student.name)
+      ||uniqueMatch(old=>old.name===student.name&&!!student.name)
+      ||uniqueMatch(old=>String(old.id)===String(student.id));
+    if(match){used.add(match.index);if(validCharacterIndex(match.student.characterIndex))student.characterIndex=match.student.characterIndex;}
+  });
+  ensureStudentCharacters(next);
+  return next;
+}
+function characterTheme(){return THEMES[characterThemeIndex]?.art||'animals';}
+function openCharacterModal(){
+  if(rigBusy)return;
+  ensureStudentCharacters();
+  const people=namedCharacterStudents();
+  if(!people.length){toast('먼저 학생을 추가해 주세요');return;}
+  const selected=sel!==null?seats[sel]:null;
+  if(selected!==null&&people.some(person=>person.index===selected))characterStudentIndex=selected;
+  if(!people.some(person=>person.index===characterStudentIndex))characterStudentIndex=people[0].index;
+  if(THEMES[printTheme]?.art)characterThemeIndex=printTheme===6?5:printTheme;
+  renderCharacterPicker();openModal('characterModal');autoSave();
+  document.getElementById('characterStatus').textContent='';
+  document.getElementById('characterStudentSelect').focus();
+}
+function closeCharacterModal(){
+  closeModal('characterModal');document.getElementById('characterSettingsBtn').focus({preventScroll:true});
+}
+function selectCharacterStudent(value){characterStudentIndex=Number(value);renderCharacterPicker();document.getElementById('characterStatus').textContent='';}
+function chooseCharacterTheme(index){
+  if(rigBusy||!THEMES[index]?.art||!GPT_CHARACTER_SHEETS[THEMES[index].art])return;
+  characterThemeIndex=index;setPrintTheme(index,true);renderCharacterPicker();
+  document.getElementById('characterStatus').textContent=THEMES[index].name+' 테마를 좌석표에도 적용했어요.';
+}
+function renderCharacterPicker(){
+  const people=namedCharacterStudents();
+  if(!people.length){closeCharacterModal();return;}
+  if(!people.some(person=>person.index===characterStudentIndex))characterStudentIndex=people[0].index;
+  const student=students[characterStudentIndex],group=characterTheme();
+  const select=document.getElementById('characterStudentSelect');
+  select.replaceChildren(...people.map(({student,index})=>{
+    const option=document.createElement('option');option.value=index;option.textContent=student.id+'번 · '+student.name;return option;
+  }));
+  select.value=String(characterStudentIndex);
+  const currentArt=document.getElementById('characterCurrentArt');
+  currentArt.style.cssText=characterPreviewStyle(group,student.characterIndex);
+  const themes=document.getElementById('characterThemeChoices');
+  const focusedTheme=themes.contains(document.activeElement)?document.activeElement.dataset.themeIndex:null;
+  themes.innerHTML='';
+  THEMES.forEach((theme,index)=>{
+    if(!theme.art||theme.legacy||!GPT_CHARACTER_SHEETS[theme.art])return;
+    const button=document.createElement('button');button.type='button';button.className='character-theme-btn';button.dataset.themeIndex=index;
+    button.textContent=theme.name;button.setAttribute('aria-pressed',String(index===characterThemeIndex));
+    button.onclick=()=>chooseCharacterTheme(index);themes.appendChild(button);
+  });
+  document.getElementById('characterStyleNote').textContent=THEMES[printTheme]?.art
+    ?'그림을 선택하면 바로 저장돼요. 숫자는 이 캐릭터를 사용하는 학생 수예요.'
+    :'지금은 '+THEMES[printTheme].name+' 테마예요. 그림을 선택하면 '+THEMES[characterThemeIndex].name+' 테마로 바뀌어요.';
+  const counts=Array(CHARACTER_COUNT).fill(0);people.forEach(({student})=>{counts[student.characterIndex]++;});
+  const grid=document.getElementById('characterGrid'),focused=grid.contains(document.activeElement)?document.activeElement.dataset.characterIndex:null;
+  grid.innerHTML='';
+  for(let index=0;index<CHARACTER_COUNT;index++){
+    const button=document.createElement('button');button.type='button';button.className='character-option';button.dataset.characterIndex=index;
+    button.setAttribute('aria-pressed',String(student.characterIndex===index));
+    button.setAttribute('aria-label',`${index+1}번 캐릭터${counts[index]?`, ${counts[index]}명이 사용 중`:''}`);
+    const art=document.createElement('span');art.className='character-option-art';art.style.cssText=characterPreviewStyle(group,index);art.setAttribute('aria-hidden','true');
+    const number=document.createElement('span');number.className='character-number';number.textContent=String(index+1).padStart(2,'0');number.setAttribute('aria-hidden','true');
+    button.append(art,number);
+    if(counts[index]){const used=document.createElement('span');used.className='character-used';used.textContent=counts[index]+'명';used.setAttribute('aria-hidden','true');button.appendChild(used);}
+    button.onclick=()=>chooseStudentCharacter(index);
+    button.onkeydown=event=>{
+      const moves={ArrowLeft:-1,ArrowRight:1,ArrowUp:-6,ArrowDown:6};
+      if(moves[event.key]===undefined)return;
+      event.preventDefault();event.stopPropagation();grid.children[(index+moves[event.key]+CHARACTER_COUNT)%CHARACTER_COUNT].focus();
+    };
+    grid.appendChild(button);
+  }
+  if(focused!==null)grid.querySelector(`[data-character-index="${focused}"]`)?.focus({preventScroll:true});
+  if(focusedTheme!==null)themes.querySelector(`[data-theme-index="${focusedTheme}"]`)?.focus({preventScroll:true});
+}
+function chooseStudentCharacter(index){
+  if(rigBusy||!validCharacterIndex(index)||!students[characterStudentIndex])return;
+  const student=students[characterStudentIndex];
+  if(student.characterIndex!==index||printTheme!==characterThemeIndex){
+    pushUndo();student.characterIndex=index;
+    if(printTheme!==characterThemeIndex)setPrintTheme(characterThemeIndex,true);
+    renderGrid();autoSave();
+  }
+  renderCharacterPicker();
+  document.getElementById('characterStatus').textContent=student.name+' 학생의 캐릭터를 바꿨어요. 다른 학생의 캐릭터는 그대로예요.';
+}
+function shuffleStudentCharacters(){
+  if(rigBusy)return;
+  const people=namedCharacterStudents();if(!people.length)return;
+  pushUndo();
+  let pool=[];
+  people.forEach(({student},index)=>{
+    if(index%CHARACTER_COUNT===0)pool=shuffle(Array.from({length:CHARACTER_COUNT},(_,i)=>i));
+    student.characterIndex=pool[index%CHARACTER_COUNT];
+  });
+  if(printTheme!==characterThemeIndex)setPrintTheme(characterThemeIndex,true);
+  renderGrid();autoSave();renderCharacterPicker();
+  document.getElementById('characterStatus').textContent=people.length<=CHARACTER_COUNT
+    ?'캐릭터를 겹치지 않게 새로 골랐어요. 학생 자리는 그대로예요.'
+    :'캐릭터를 고르게 나눠 새로 골랐어요. 학생 자리는 그대로예요.';
+}
+document.getElementById('characterModal').addEventListener('click',event=>{if(event.target.id==='characterModal')closeCharacterModal();});
+document.getElementById('characterModal').addEventListener('keydown',event=>{
+  if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeCharacterModal();return;}
+  if(event.key==='Tab'){
+    const controls=[...event.currentTarget.querySelectorAll('button:not([disabled]),select:not([disabled])')];
+    const first=controls[0],last=controls[controls.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}
+  }
+});
 
 /* ── FONTS ── */
 const FONTS=[
@@ -1824,12 +2015,14 @@ function initSeats(){
 
 /* ── 저장 ── */
 function autoSave(){
+  ensureStudentCharacters();
   try{localStorage.setItem('seatApp7',JSON.stringify({COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher,rigTarget}));}catch(e){}
 }
 
 /* ── 실행취소 (Undo) ── */
 let undoStack=[];
 function pushUndo(){
+  ensureStudentCharacters();
   const snap=JSON.stringify({COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher});
   undoStack.push(snap);
   if(undoStack.length>50)undoStack.shift();
@@ -1864,6 +2057,7 @@ function loadLocal(){
     const d=JSON.parse(r);
     COLS=d.COLS||5;ROWS=d.ROWS||5;bonus=d.bonus||0;
     students=d.students||[];seats=d.seats||[];
+    ensureStudentCharacters();
     fixed=new Set(d.fixed||[]);
     rigTarget=Array.isArray(d.rigTarget)?d.rigTarget:null;
     pairMode=!!d.pairMode;
@@ -1956,6 +2150,7 @@ async function openImportDialog(){
 }
 async function exportData(){
   if(rigBusy)return;
+  ensureStudentCharacters();
   const data={version:3,COLS,ROWS,bonus,students,seats,fixed:[...fixed],pairMode,printTheme,classGrade,classTeacher,rigTarget};
   const text=JSON.stringify(data,null,2);
   const now=new Date();
@@ -2006,7 +2201,8 @@ function applyBackupText(text){
   }
   const occupied=d.seats.filter(si=>si!==null);
   if(new Set(occupied).size!==occupied.length)throw new Error('invalid-backup');
-  const importedStudents=d.students.map(s=>({id:String(s.id),name:s.name}));
+  const importedStudents=d.students.map(s=>({id:String(s.id),name:s.name,...(validCharacterIndex(s.characterIndex)?{characterIndex:s.characterIndex}:{})}));
+  ensureStudentCharacters(importedStudents);
   let grade='',teacher='';
   if(d.classGrade!==undefined||d.classTeacher!==undefined){
     grade=String(d.classGrade||'');teacher=String(d.classTeacher||'');
@@ -2047,6 +2243,7 @@ function render(){
   const warn=document.getElementById('overWarn');
   warn.style.display=stCount>total?'block':'none';
   updatePinBtn();
+  if(document.getElementById('characterModal').classList.contains('open'))renderCharacterPicker();
 }
 
 function calcSeatSize(){
@@ -2086,6 +2283,7 @@ function calcSeatSize(){
 }
 
 function renderGrid(){
+  ensureStudentCharacters();
   const total=getTotal();
   // bonus가 있으면(부분 행) 마지막 행을 끝까지 placeholder로 채워 드롭 가능하게
   const fullRows=Math.ceil(total/COLS);
@@ -2167,12 +2365,15 @@ function makePhSlot(targetIdx){
 
 function makeSeatEl(i){
   const si=seats[i];
+  const s=si!==null?students[si]:null;
   const col=i%COLS;
   const row=Math.floor(i/COLS);
-  const charGrp=i%8;
+  const characterIndex=validCharacterIndex(s?.characterIndex)?s.characterIndex:0;
+  const charGrp=characterIndex%8;
   const el=document.createElement('div');
   el.className='seat cg'+charGrp;
-  applyCharacterArt(el,i);
+  applyCharacterArt(el,characterIndex);
+  if(s&&s.name)el.dataset.characterIndex=characterIndex;
   el.dataset.idx=i;
   el.dataset.col=col;
   el.dataset.chargrp=charGrp;
@@ -2181,7 +2382,6 @@ function makeSeatEl(i){
   if(si===null)el.classList.add('empty');
   if(sel===i)el.classList.add('sel');
   if(pairMode&&col%2===1&&col<COLS-1)el.classList.add('pair-end');
-  const s=si!==null?students[si]:null;
   const nameEl=document.createElement('div');
   nameEl.className='sname';nameEl.textContent=(s&&s.name)?s.name:'빈 자리';
   el.appendChild(nameEl);
@@ -2204,7 +2404,7 @@ function makeSeatEl(i){
         const rect=el.getBoundingClientRect();
         ghost=el.cloneNode(true);
         ghost.classList.remove('dragging','sel');
-        ghost.style.cssText=`position:fixed;left:0;top:0;pointer-events:none;opacity:.85;z-index:99999;width:${rect.width}px;height:${rect.height}px;transition:none;transform:translate(${ev.clientX-rect.width/2}px,${ev.clientY-rect.height/2}px) rotate(-2deg);box-shadow:0 12px 28px rgba(44,24,16,.35)`;
+        ghost.style.cssText+=`;position:fixed;left:0;top:0;pointer-events:none;opacity:.85;z-index:99999;width:${rect.width}px;height:${rect.height}px;transition:none;transform:translate(${ev.clientX-rect.width/2}px,${ev.clientY-rect.height/2}px) rotate(-2deg);box-shadow:0 12px 28px rgba(44,24,16,.35)`;
         document.body.appendChild(ghost);
       }
       if(ghost){
@@ -2491,6 +2691,7 @@ function riggedReveal(){
       if(!nm||!pool.length)return;
       const si=pool[Math.floor(Math.random()*pool.length)];
       nm.textContent=students[si].name;if(idd)idd.textContent=students[si].id+'번';
+      applyCharacterArt(el,students[si].characterIndex);
       el.classList.add('scrambling');
     });
     if(t>=TICKS){
@@ -2613,6 +2814,7 @@ function addEditRowAt(i,id,name){
   const tb=document.getElementById('editBody');
   const tr=document.createElement('tr');
   tr.dataset.rowIdx=i;
+  if(students[i]&&students[i].id===id&&students[i].name===name)tr.dataset.studentIndex=i;
   tr.innerHTML=`<td class="rlbl">${i+1}</td>
     <td><input type="text" placeholder="예: 1101" id="eid_${i}" maxlength="12"></td>
     <td><input type="text" placeholder="이름" id="enm_${i}" maxlength="10"></td>
@@ -2725,7 +2927,8 @@ function applyStudentsFromActiveTab(){
       const name=tr.querySelector('input[id^="enm_"]')?.value.trim()||'';
       // 학번 비어있으면 행 번호로 자동 부여 (학번 입력은 선택사항)
       if(!id)id=String(autoNum).padStart(2,'0');
-      newStudents.push({id,name});
+      const original=students[Number(tr.dataset.studentIndex)];
+      newStudents.push({id,name,...(tr.dataset.studentIndex!==undefined&&validCharacterIndex(original?.characterIndex)?{characterIndex:original.characterIndex}:{})});
     });
     // trim trailing empties
     while(newStudents.length>0&&!newStudents[newStudents.length-1].name&&!newStudents[newStudents.length-1].id){
@@ -2742,7 +2945,7 @@ function applyStudentsFromActiveTab(){
   if(!newStudents||newStudents.length===0){toast('⚠️ 학생이 없어요');return;}
 
   pushUndo();
-  students=newStudents;
+  students=preserveStudentCharacters(newStudents);
   // 학생이 좌석보다 많으면 bonus 좌석으로 자동 확장 (ROWS는 그대로)
   const need=students.filter(s=>s.name).length;
   while(need>getTotal())bonus++;
@@ -2797,6 +3000,7 @@ function startPrint(){
 /* ── INIT ── */
 if(window.seatDesktop)document.getElementById('desktopDownload').style.display='none';
 if(!loadLocal()){initDefault();initSeats();}
+ensureStudentCharacters();
 applyPairToggle();
 setPrintTheme(printTheme,true);
 loadFont();
@@ -2890,8 +3094,9 @@ document.addEventListener('keydown',e=>{
 
 document.addEventListener('keydown',e=>{
   if(rigBusy)return;
+  if(document.querySelector('.moverlay.open'))return;
   const tag=(e.target&&e.target.tagName)||'';
-  if(tag==='INPUT'||tag==='TEXTAREA')return;
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||tag==='BUTTON')return;
   if(sel===null)return;
   const total=getTotal();
   const dispRows=Math.ceil(total/COLS);
