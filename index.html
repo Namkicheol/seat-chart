@@ -1621,7 +1621,9 @@ function renderClassInfoPrint(){
   const t=(classTeacher||'').trim();
   const teacherTxt=t?(t.includes('선생님')?t:(t+' 선생님')):'';
   if(g&&teacherTxt){
-    p.innerHTML=`${g}<span class="cip-sep">|</span>담임: ${teacherTxt}`;
+    const separator=document.createElement('span');
+    separator.className='cip-sep';separator.textContent='|';
+    p.replaceChildren(document.createTextNode(g),separator,document.createTextNode(`담임: ${teacherTxt}`));
   } else if(g){
     p.textContent=g;
   } else if(teacherTxt){
@@ -2482,9 +2484,11 @@ function addEditRowAt(i,id,name){
   const tr=document.createElement('tr');
   tr.dataset.rowIdx=i;
   tr.innerHTML=`<td class="rlbl">${i+1}</td>
-    <td><input type="text" placeholder="예: 1101" value="${id}" id="eid_${i}" maxlength="12"></td>
-    <td><input type="text" placeholder="이름" value="${name}" id="enm_${i}" maxlength="10"></td>
+    <td><input type="text" placeholder="예: 1101" id="eid_${i}" maxlength="12"></td>
+    <td><input type="text" placeholder="이름" id="enm_${i}" maxlength="10"></td>
     <td class="rdel"><button type="button" class="btn-del-row" title="행 삭제" onclick="delEditRow(${i})">✕</button></td>`;
+  tr.querySelector(`#eid_${i}`).value=id;
+  tr.querySelector(`#enm_${i}`).value=name;
   tb.appendChild(tr);
 }
 
