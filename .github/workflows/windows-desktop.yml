@@ -1,0 +1,52 @@
+name: Build Windows desktop app
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Verify installer and bundled application
+        shell: pwsh
+        run: |
+          $setup = Get-Item dist/SeatChart-Setup.exe
+          if ($setup.Length -lt 20MB) { throw 'Installer payload is missing.' }
+          $signature = [System.IO.File]::ReadAllBytes($setup.FullName)[0..1]
+          if ($signature[0] -ne 77 -or $signature[1] -ne 90) { throw 'Installer is not a Windows executable.' }
+          $bundled = Get-Content ui/version.json | ConvertFrom-Json
+          $actual = (Get-FileHash ../index.html -Algorithm SHA256).Hash.ToLowerInvariant()
+          if ($actual -ne $bundled.hash) { throw 'Bundled UI differs from current source.' }
+      - name: Install and launch the packaged Windows app
+        shell: pwsh
+        run: |
+          $installDir = Join-Path $env:RUNNER_TEMP 'SeatChartInstalled'
+          $process = Start-Process -FilePath (Resolve-Path dist/SeatChart-Setup.exe) -ArgumentList '/S', "/D=$installDir" -Wait -PassThru
+          if ($process.ExitCode -ne 0) { throw "Installer failed: $($process.ExitCode)" }
+          $appExe = Join-Path $installDir '자리 배치표.exe'
+          if (!(Test-Path $appExe)) { throw 'Installed application executable is missing.' }
+          node scripts/smoke-installed.cjs $appExe
+          if ($LASTEXITCODE -ne 0) { throw 'Installed application smoke test failed.' }
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: SeatChart-Windows-x64
+          path: desktop/dist/SeatChart-Setup.exe
+          if-no-files-found: error
+          retention-days: 14

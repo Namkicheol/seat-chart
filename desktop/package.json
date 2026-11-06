@@ -1,0 +1,60 @@
+{
+  "name": "seat-chart-desktop",
+  "version": "1.0.0",
+  "description": "설치해서 쓰는 자리 배치표 — 오프라인 실행, 폴더 기억, 업데이트",
+  "author": "Namkicheol",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Namkicheol/seat-chart.git"
+  },
+  "private": true,
+  "main": "main.cjs",
+  "scripts": {
+    "prepare-ui": "node scripts/prepare-ui.cjs",
+    "start": "npm run prepare-ui && electron .",
+    "dist:win": "npm run prepare-ui && electron-builder --win nsis --x64",
+    "test": "node --test test/*.test.cjs"
+  },
+  "devDependencies": {
+    "electron": "45.2.3",
+    "electron-builder": "26.18.0",
+    "playwright": "^1.65.0"
+  },
+  "build": {
+    "appId": "kr.namkicheol.seatchart",
+    "productName": "자리 배치표",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "update-utils.cjs",
+      "ui/**/*",
+      "assets/*.png",
+      "package.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico",
+      "signExecutable": false
+    },
+    "nsis": {
+      "artifactName": "SeatChart-Setup.exe",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages": [
+        "ko_KR",
+        "en_US"
+      ],
+      "language": "1042"
+    }
+  }
+}
