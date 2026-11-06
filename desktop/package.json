@@ -12,7 +12,7 @@
   "scripts": {
     "prepare-ui": "node scripts/prepare-ui.cjs",
     "start": "npm run prepare-ui && electron .",
-    "dist:win": "npm run prepare-ui && electron-builder --win nsis --x64",
+    "dist:win": "npm run prepare-ui && electron-builder --win nsis --x64 --publish never",
     "test": "node --test test/*.test.cjs"
   },
   "devDependencies": {
